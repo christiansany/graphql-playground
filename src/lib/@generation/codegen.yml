@@ -1,0 +1,22 @@
+schema: ["src/**/*.graphql"]
+generates:
+  src/lib/@generation/generated.ts:
+    plugins:
+      - add:
+          content: // Generated File. Do not change it manually!
+      - add:
+          content: // tslint:disable:no-any
+      - typescript
+      - typescript-resolvers
+    config:
+      skipTypename: true
+      namingConvention:
+        typeNames: change-case#pascalCase
+        enumValues: keep
+      contextType: src/types#IContext
+      scalars:
+        Void: "void"
+hooks:
+  afterOneFileWrite:
+    - tslint --fix
+    - prettier --write

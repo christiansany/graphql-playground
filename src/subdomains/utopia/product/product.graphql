@@ -1,0 +1,31 @@
+type Query {
+  product(id: ID!): Product
+  products(
+    first: Int
+    last: Int
+    before: String
+    after: String
+    query: String
+  ): ProductConnection!
+}
+
+type Product implements Node {
+  id: ID!
+  name: String!
+  description: String!
+}
+
+type ProductEdge implements Edge {
+  cursor: String!
+  node: Product!
+}
+
+type ProductConnection implements Connection {
+  edges: [ProductEdge!]!
+  pageInfo: PageInfo!
+}
+
+# Connections
+extend type ProductRating {
+  product: Product!
+}
