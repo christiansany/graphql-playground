@@ -1,8 +1,6 @@
 import { QueryUserArgs, QueryUsersArgs } from "@generation/generated";
 import { IContext } from "src/types";
 
-import { gamificationInfos } from "./__mock__";
-
 export default {
   Query: {
     me: (_: object, __: never, context: IContext) => {
@@ -14,14 +12,6 @@ export default {
     },
     users: (_: object, connection: QueryUsersArgs, context: IContext) => {
       return context.dataLoaders.User.byConnection.load(connection);
-    },
-  },
-  User: {
-    gamificationInfo: (source: any) => {
-      return (
-        gamificationInfos.find((info) => info.id === source.gamificationInfo) ||
-        null
-      );
     },
   },
 };

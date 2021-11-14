@@ -30,26 +30,3 @@ export const users = [
     gamificationInfo: 1,
   },
 ];
-
-export const gamificationInfos = [
-  {
-    id: 1,
-    rank: "King Cobra",
-  },
-  {
-    id: 2,
-    rank: "Pigeon",
-  },
-  {
-    id: 3,
-    rank: "Narwhal",
-  },
-  {
-    id: 4,
-    rank: "Lemur",
-  },
-  {
-    id: 5,
-    rank: "Chilean Basket Star",
-  },
-];

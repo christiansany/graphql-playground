@@ -14,7 +14,6 @@ type User implements Node {
   id: ID!
   username: String!
   email: String!
-  gamificationInfo: GamificationInfo!
 }
 
 type UserEdge implements Edge {
@@ -25,10 +24,4 @@ type UserEdge implements Edge {
 type UserConnection implements Connection {
   edges: [UserEdge!]!
   pageInfo: PageInfo!
-}
-
-# This should probably be its own type
-type GamificationInfo implements Node {
-  id: ID!
-  rank: String!
 }
