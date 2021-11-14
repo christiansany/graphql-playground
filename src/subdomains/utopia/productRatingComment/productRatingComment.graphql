@@ -10,12 +10,12 @@ type Query {
 
 type ProductRatingComment implements Node & Contribution {
   id: ID!
-  creator: User!
   text: String!
   votesSummary: ProductRatingCommentVotesSummary!
   rating: ProductRating!
   insertDate: String! # Todo: make custom Scalar Type
   lastActivityDate: String! # Todo: make custom Scalar Type
+  creator: User!
 }
 
 type ProductRatingCommentEdge implements Edge {

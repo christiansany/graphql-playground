@@ -25,6 +25,11 @@ export default {
       );
     },
   },
+  ProductRatingComment: {
+    creator: (source: any, _: never, context: IContext) => {
+      return context.dataLoaders.User.byId.load(source.creator.toString());
+    },
+  },
   User: {
     productRatingComments: (
       source: any,

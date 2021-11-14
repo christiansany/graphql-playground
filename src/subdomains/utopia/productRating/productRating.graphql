@@ -9,7 +9,7 @@ type Query {
   ): ProductRatingConnection!
 }
 
-type ProductRating implements Node {
+type ProductRating implements Node & Contribution {
   id: ID!
   title: String
   text: String
@@ -20,6 +20,8 @@ type ProductRating implements Node {
   votesSummary: ProductRatingVotesSummary!
   pros: [String!]
   cons: [String!]
+  product: Product!
+  creator: User!
 }
 
 type ProductRatingEdge implements Edge {

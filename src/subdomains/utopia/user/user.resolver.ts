@@ -6,7 +6,7 @@ import { gamificationInfos } from "./__mock__";
 export default {
   Query: {
     me: (_: object, __: never, context: IContext) => {
-      const meId = 1; // Pretending to read user id from context
+      const meId = 1; // TODO Pretending to read user id from context
       return context.dataLoaders.User.byId.load(meId.toString());
     },
     user: (_: object, { id }: QueryUserArgs, context: IContext) => {
@@ -22,16 +22,6 @@ export default {
         gamificationInfos.find((info) => info.id === source.gamificationInfo) ||
         null
       );
-    },
-  },
-  ProductRating: {
-    creator: (source: any, _: never, context: IContext) => {
-      return context.dataLoaders.User.byId.load(source.creator.toString());
-    },
-  },
-  ProductRatingComment: {
-    creator: (source: any, _: never, context: IContext) => {
-      return context.dataLoaders.User.byId.load(source.creator.toString());
     },
   },
 };

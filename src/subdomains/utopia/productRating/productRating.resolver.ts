@@ -25,6 +25,14 @@ export default {
       return context.dataLoaders.ProductRating.byConnection.load(connection);
     },
   },
+  ProductRating: {
+    product: (source: any, _: never, context: IContext) => {
+      return context.dataLoaders.Product.byId.load(source.product.toString());
+    },
+    creator: (source: any, _: never, context: IContext) => {
+      return context.dataLoaders.User.byId.load(source.creator.toString());
+    },
+  },
   User: {
     productRatings: (
       source: any,

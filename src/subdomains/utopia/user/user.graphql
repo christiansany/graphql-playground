@@ -32,12 +32,3 @@ type GamificationInfo implements Node {
   id: ID!
   rank: String!
 }
-
-# Connections
-extend type ProductRating implements Contribution {
-  creator: User!
-}
-
-extend type ProductRatingComment implements Contribution {
-  creator: User!
-}
