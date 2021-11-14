@@ -13,7 +13,7 @@ generates:
       namingConvention:
         typeNames: change-case#pascalCase
         enumValues: keep
-      contextType: src/types#IContext
+      contextType: src/server/types#GraphQLCustomResolversContext
       scalars:
         Void: "void"
 hooks:

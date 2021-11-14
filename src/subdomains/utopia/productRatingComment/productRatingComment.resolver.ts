@@ -4,21 +4,21 @@ import {
   QueryProductRatingCommentsArgs,
   UserProductRatingCommentsArgs,
 } from "@generation/generated";
-import { IContext } from "src/types";
+import { GraphQLCustomResolversContext } from "src/server/types";
 
 export default {
   Query: {
     productRatingComment: (
       _: never,
       { id }: QueryProductRatingCommentArgs,
-      context: IContext
+      context: GraphQLCustomResolversContext
     ) => {
       return context.dataLoaders.ProductRatingComment.byId.load(id);
     },
     productRatingComments: (
       _: never,
       connection: QueryProductRatingCommentsArgs,
-      context: IContext
+      context: GraphQLCustomResolversContext
     ) => {
       return context.dataLoaders.ProductRatingComment.byConnection.load(
         connection
@@ -26,15 +26,19 @@ export default {
     },
   },
   ProductRatingComment: {
-    creator: (source: any, _: never, context: IContext) => {
-      return context.dataLoaders.User.byId.load(source.creator.toString());
+    creator: (
+      source: any,
+      _: never,
+      { dataSources }: GraphQLCustomResolversContext
+    ) => {
+      return dataSources.users.getUserById(source.creator.toString());
     },
   },
   User: {
     productRatingComments: (
       source: any,
       connection: UserProductRatingCommentsArgs,
-      context: IContext
+      context: GraphQLCustomResolversContext
     ) => {
       return context.dataLoaders.ProductRatingComment.byConnection.load({
         ...connection,
@@ -46,7 +50,7 @@ export default {
     comments: (
       source: any,
       connection: ProductRatingCommentsArgs,
-      context: IContext
+      context: GraphQLCustomResolversContext
     ) => {
       return context.dataLoaders.ProductRatingComment.byConnection.load({
         ...connection,

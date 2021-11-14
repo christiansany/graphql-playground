@@ -7,20 +7,15 @@ import createProductRatingDataLoaders, {
 import createProductRatingCommentDataLoaders, {
   ProductRatingCommentDataLoaders,
 } from "./utopia/productRatingComment/dataloader";
-import createUserDataLoaders, {
-  UserDataLoaders,
-} from "./utopia/user/dataloader";
 
 export default class DataLoaders {
   public Product: ProductDataLoaders;
   public ProductRating: ProductRatingDataLoaders;
   public ProductRatingComment: ProductRatingCommentDataLoaders;
-  public User: UserDataLoaders;
 
   constructor() {
-      this.Product = createProductDataLoaders();
-      this.ProductRating = createProductRatingDataLoaders();
-      this.ProductRatingComment = createProductRatingCommentDataLoaders();
-      this.User = createUserDataLoaders();
+    this.Product = createProductDataLoaders();
+    this.ProductRating = createProductRatingDataLoaders();
+    this.ProductRatingComment = createProductRatingCommentDataLoaders();
   }
 }
