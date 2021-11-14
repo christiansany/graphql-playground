@@ -11,14 +11,14 @@ import { productRatings } from "./__mock__";
 export default {
   Query: {
     productRating: (
-      _: object,
+      _: never,
       { id }: QueryProductRatingArgs,
       context: IContext
     ) => {
       return context.dataLoaders.ProductRating.byId.load(id);
     },
     productRatings: (
-      _: object,
+      _: never,
       connection: QueryProductRatingsArgs,
       context: IContext
     ) => {

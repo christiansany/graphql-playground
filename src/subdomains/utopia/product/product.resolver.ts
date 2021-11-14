@@ -6,11 +6,11 @@ import { IContext } from "src/types";
 
 export default {
   Query: {
-    product: (_: object, { id }: QueryProductRatingArgs, context: IContext) => {
+    product: (_: never, { id }: QueryProductRatingArgs, context: IContext) => {
       return context.dataLoaders.Product.byId.load(id);
     },
     products: (
-      _: object,
+      _: never,
       connection: QueryProductRatingsArgs,
       context: IContext
     ) => {

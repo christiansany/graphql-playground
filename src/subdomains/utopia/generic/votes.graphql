@@ -1,0 +1,26 @@
+interface Votable {
+  votesSummary: VotesSummary!
+  votes: [Vote!]!
+  userVote: Vote
+}
+
+type VotesSummary {
+  voteScore: Int!
+  upVoteCount: Int!
+  downVoteCount: Int!
+  abusiveVoteCount: Int!
+}
+
+type Vote implements Timestamps {
+  id: ID!
+  user: User!
+  type: VoteType!
+  insertDate: DateTime!
+  lastActivityDate: DateTime!
+}
+
+enum VoteType {
+  UpVote
+  DownVote
+  AbusiveVote
+}

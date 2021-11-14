@@ -34,16 +34,7 @@ interface Contribution {
   creator: User!
 }
 
-interface VotesSummary {
-  upVoteCount: Int!
-  downVoteCount: Int!
-  abusiveVoteCount: Int!
-  voteScore: Int!
-  userVoteType: CommunityVoteType
-}
-
-enum CommunityVoteType {
-  UpVote
-  DownVote
-  AbusiveVote
+interface Timestamps {
+  insertDate: DateTime!
+  lastActivityDate: DateTime!
 }

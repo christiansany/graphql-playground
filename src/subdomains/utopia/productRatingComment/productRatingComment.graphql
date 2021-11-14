@@ -8,13 +8,15 @@ type Query {
   ): ProductRatingCommentConnection!
 }
 
-type ProductRatingComment implements Node & Contribution {
+type ProductRatingComment implements Node & Timestamps & Votable & Contribution {
   id: ID!
   text: String!
-  votesSummary: ProductRatingCommentVotesSummary!
   rating: ProductRating!
-  insertDate: String! # Todo: make custom Scalar Type
-  lastActivityDate: String! # Todo: make custom Scalar Type
+  insertDate: DateTime!
+  lastActivityDate: DateTime!
+  votesSummary: VotesSummary!
+  votes: [Vote!]!
+  userVote: Vote
   creator: User!
 }
 
@@ -26,14 +28,6 @@ type ProductRatingCommentEdge implements Edge {
 type ProductRatingCommentConnection implements Connection {
   edges: [ProductRatingCommentEdge!]!
   pageInfo: PageInfo!
-}
-
-type ProductRatingCommentVotesSummary implements VotesSummary {
-  upVoteCount: Int!
-  downVoteCount: Int!
-  abusiveVoteCount: Int!
-  voteScore: Int!
-  userVoteType: CommunityVoteType
 }
 
 # Connections

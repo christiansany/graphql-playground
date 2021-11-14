@@ -9,14 +9,14 @@ import { IContext } from "src/types";
 export default {
   Query: {
     productRatingComment: (
-      _: object,
+      _: never,
       { id }: QueryProductRatingCommentArgs,
       context: IContext
     ) => {
       return context.dataLoaders.ProductRatingComment.byId.load(id);
     },
     productRatingComments: (
-      _: object,
+      _: never,
       connection: QueryProductRatingCommentsArgs,
       context: IContext
     ) => {

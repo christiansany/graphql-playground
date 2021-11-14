@@ -9,17 +9,19 @@ type Query {
   ): ProductRatingConnection!
 }
 
-type ProductRating implements Node & Contribution {
+type ProductRating implements Node & Timestamps & Votable & Contribution {
   id: ID!
   title: String
   text: String
   ratingScore: Int! # Todo: make custom Scalar Type
   creatorIsVerifiedBuyer: Boolean!
-  insertDate: String! # Todo: make custom Scalar Type
-  lastActivityDate: String! # Todo: make custom Scalar Type
-  votesSummary: ProductRatingVotesSummary!
+  insertDate: DateTime!
+  lastActivityDate: DateTime!
   pros: [String!]
   cons: [String!]
+  votesSummary: VotesSummary!
+  votes: [Vote!]!
+  userVote: Vote
   product: Product!
   creator: User!
 }
@@ -32,14 +34,6 @@ type ProductRatingEdge implements Edge {
 type ProductRatingConnection implements Connection {
   edges: [ProductRatingEdge!]!
   pageInfo: PageInfo!
-}
-
-type ProductRatingVotesSummary implements VotesSummary {
-  upVoteCount: Int!
-  downVoteCount: Int!
-  abusiveVoteCount: Int!
-  voteScore: Int!
-  userVoteType: CommunityVoteType
 }
 
 # Summary
