@@ -7,7 +7,8 @@ type Query {
     before: String
     after: String
     query: String
-    sortKey: UserSortKey
+    sortKey: UserSortKey = ID
+    reverse: Boolean = false
   ): UserConnection!
 }
 
@@ -15,6 +16,7 @@ enum UserSortKey {
   ID
   USERNAME
   EMAIL
+  HEIGHT
 }
 
 type Mutation {
@@ -36,6 +38,7 @@ input UserUpdateInput {
   id: ID!
   username: String!
   email: String!
+  height: Int!
 }
 
 type UserUpdateResponse {
@@ -47,6 +50,7 @@ type User implements Node {
   id: ID!
   username: String!
   email: String!
+  height: Int!
 }
 
 type UserEdge implements Edge {

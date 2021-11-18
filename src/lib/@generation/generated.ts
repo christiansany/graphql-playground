@@ -220,6 +220,7 @@ export type QueryUsersArgs = {
   after?: Maybe<Scalars["String"]>;
   query?: Maybe<Scalars["String"]>;
   sortKey?: Maybe<UserSortKey>;
+  reverse?: Maybe<Scalars["Boolean"]>;
 };
 
 export type Timestamps = {
@@ -229,6 +230,7 @@ export type Timestamps = {
 
 export type User = Node & {
   email: Scalars["String"];
+  height: Scalars["Int"];
   id: Scalars["ID"];
   productRatingComments: ProductRatingCommentConnection;
   productRatings: ProductRatingConnection;
@@ -278,12 +280,14 @@ export enum UserSortKey {
   ID = "ID",
   USERNAME = "USERNAME",
   EMAIL = "EMAIL",
+  HEIGHT = "HEIGHT",
 }
 
 export type UserUpdateInput = {
   id: Scalars["ID"];
   username: Scalars["String"];
   email: Scalars["String"];
+  height: Scalars["Int"];
 };
 
 export type UserUpdateResponse = {
@@ -903,7 +907,7 @@ export type QueryResolvers<
     ResolversTypes["UserConnection"],
     ParentType,
     ContextType,
-    RequireFields<QueryUsersArgs, never>
+    RequireFields<QueryUsersArgs, "sortKey" | "reverse">
   >;
 };
 
@@ -929,6 +933,7 @@ export type UserResolvers<
   ParentType extends ResolversParentTypes["User"] = ResolversParentTypes["User"]
 > = {
   email?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
+  height?: Resolver<ResolversTypes["Int"], ParentType, ContextType>;
   id?: Resolver<ResolversTypes["ID"], ParentType, ContextType>;
   productRatingComments?: Resolver<
     ResolversTypes["ProductRatingCommentConnection"],

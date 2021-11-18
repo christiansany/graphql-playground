@@ -6,6 +6,7 @@ export interface UserDocument {
   _id: ObjectId;
   username: string;
   email: string;
+  height: number;
 }
 
 export type SourceUserConnection = SourceConnection<UserDocument>;

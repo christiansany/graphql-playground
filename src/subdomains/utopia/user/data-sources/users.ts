@@ -13,6 +13,10 @@ import {
 import btoa from "btoa";
 import atob from "atob";
 
+const parseCursor: (endodedString: string) => [string, string | undefined] = (
+  endodedString
+) => atob(endodedString).split(":");
+
 // function generatePaginationQuery(query, sort, nextKey) {
 //   const sortField = sort == null ? null : sort[0];
 
@@ -75,9 +79,16 @@ export default class UsersAPI extends MongoDataSource<UserDocument> {
     last,
     before,
     query,
-    sortKey = UserSortKey.ID,
+    sortKey,
+    reverse,
   }: QueryUsersArgs): Promise<SourceUserConnection> {
     const collection: Collection<UserDocument> = this.collection;
+
+    if (!first && !last) {
+      throw new Error("TODO: Errormessage -> !first && !last");
+    }
+
+    console.log({ reverse, sortKey });
 
     // TODO: Validation of the args and potential throw when not good.
     // - Either first or last msut be set
@@ -98,13 +109,7 @@ export default class UsersAPI extends MongoDataSource<UserDocument> {
       // email: { $eq: "alligator0@gmail.com" },
     };
 
-    if (after) console.log("after", atob(after));
-
-    let sortOptions;
-    let sort: Sort = { _id: 1 };
-    let createCursor: (doc: UserDocument) => string = (doc: UserDocument) =>
-      btoa(doc._id.toString());
-
+    let sort: Sort;
     let sortField: keyof UserDocument | undefined;
 
     // enum Actions {
@@ -153,86 +158,107 @@ export default class UsersAPI extends MongoDataSource<UserDocument> {
     //   unique: false
     // }]})
 
+    const sortConfigs = {
+      [UserSortKey.ID]: {
+        field: "_id",
+        unique: true,
+      },
+      [UserSortKey.USERNAME]: {
+        field: "username",
+      },
+      [UserSortKey.EMAIL]: {
+        field: "email",
+        unique: true,
+      },
+      [UserSortKey.HEIGHT]: {
+        field: "height",
+      },
+    };
+
     switch (sortKey) {
       case UserSortKey.ID:
-        sort = first ? { _id: 1 } : { _id: -1 };
+        sortField = "_id"; // This is actually  not needed
         break;
       case UserSortKey.USERNAME:
-        createCursor = (doc) => btoa(`${doc._id.toString()}:${doc.username}`);
-
-        // const [id, sortFieldValue] = parseCursor(after)
-
-        sort = first ? { username: 1, _id: 1 } : { username: -1, _id: -1 };
-        if (after) {
-          hasPreviousPage = true;
-          // options = { username: { $gt: after } };
-
-          sortField = "username";
-          const [id, sortFieldValue] = atob(after).split(":");
-
-          const sortOperator = first ? "$gt" : "$lt";
-
-          const paginationQuery = {
-            $or: [
-              { [sortField]: { [sortOperator]: sortFieldValue } },
-              {
-                $and: [
-                  { [sortField]: sortFieldValue },
-                  { _id: { [sortOperator]: id } },
-                ],
-              },
-            ],
-          };
-
-          options = { $and: [options, paginationQuery] };
-          console.log({ options: JSON.stringify(options) });
-        }
+        sortField = "username";
         break;
       case UserSortKey.EMAIL:
-        sort = first ? { email: 1, _id: 1 } : { email: -1, _id: -1 };
+        sortField = "email";
+        break;
+      case UserSortKey.HEIGHT:
+        sortField = "height";
         break;
     }
 
-    createCursor = (doc) =>
+    const createCursor = (doc: UserDocument) =>
       btoa(`${doc._id.toString()}:${sortField ? doc[sortField] : null}`);
 
+    if (sortField && sortField !== "_id") {
+      sort = first ? { [sortField]: 1, _id: 1 } : { [sortField]: -1, _id: -1 };
+    } else {
+      sort = first ? { _id: 1 } : { _id: -1 };
+    }
+
+    const sortOperator = first ? "$gt" : "$lt";
+    let paginationQuery = {};
+
+    if (after || before) {
+      // TODO fix as
+      const [id, sortFieldValue] = parseCursor(after || (before as string));
+
+      // TODO: When quierying a unique field, this could be optimized to be faster
+      paginationQuery =
+        sortField && sortField !== "_id"
+          ? {
+              $or: [
+                { [sortField]: { [sortOperator]: sortFieldValue } },
+                {
+                  $and: [
+                    { [sortField]: sortFieldValue },
+                    { _id: { [sortOperator]: id } },
+                  ],
+                },
+              ],
+            }
+          : { _id: { [sortOperator]: id } };
+    }
+
+    if (after) {
+      hasPreviousPage = true;
+    }
+    if (before) {
+      hasNextPage = true;
+    }
+
+    // TODO Fix as
+    const limit = first ? first : (last as number);
+
+    dataset = collection
+      .find({ $and: [options, paginationQuery] })
+      .sort(sort)
+      .limit(limit + 1);
+    data = await dataset.toArray();
+
     if (first) {
-      // if (after) {
-      //   hasPreviousPage = true;
-      //   options = { $and: [options, { _id: { $gt: new ObjectId(after) } }] };
-      // }
-      dataset = collection
-        .find(options)
-        .sort(sort)
-        .limit(first + 1);
-      data = await dataset.toArray();
-      hasNextPage = data.length === first + 1;
+      hasNextPage = data.length === limit + 1;
       if (hasNextPage) data.pop();
     }
 
     if (last) {
-      if (before) {
-        hasNextPage = true;
-        options = { $and: [options, { _id: { $lt: new ObjectId(before) } }] };
-      }
-      dataset = collection
-        .find(options)
-        .sort(sort)
-        .limit(last + 1);
-      data = await dataset.toArray();
+      hasPreviousPage = data.length === limit + 1;
+      if (hasPreviousPage) data.pop();
       // Reverse array again, since we had to reverse the array in the find
       // This also corrects the start and end cursor
       data.reverse();
-      hasPreviousPage = data.length === last + 1;
-      if (hasPreviousPage) data.shift();
     }
 
-    // TODO: Cursor should contain the id, sort order, and value of the field the sort is being made on
+    // TODO: This doesn't work at all... the whole sorting must be switched
+    // if (reverse) {
+    //   data.reverse();
+    // }
 
-    // const customCursor = `${data[0]._id.toString()}:${data[0].username}`
-
-    startCursor = data.length ? createCursor(data[0]) : null; // TODO: curser msut take sortKey into consideration
-    endCursor = data.length ? createCursor(data[data.length - 1]) : null; // TODO: curser msut take sortKey into consideration
+    startCursor = data.length ? createCursor(data[0]) : null;
+    endCursor = data.length ? createCursor(data[data.length - 1]) : null;
 
     const connectionResponse: SourceUserConnection = {
       edges: data.map((user) => ({
