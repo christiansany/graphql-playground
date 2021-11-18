@@ -219,6 +219,7 @@ export type QueryUsersArgs = {
   before?: Maybe<Scalars["String"]>;
   after?: Maybe<Scalars["String"]>;
   query?: Maybe<Scalars["String"]>;
+  sortKey?: Maybe<UserSortKey>;
 };
 
 export type Timestamps = {
@@ -272,6 +273,12 @@ export type UserError = DisplayableError & {
   field?: Maybe<Array<Scalars["String"]>>;
   message: Scalars["String"];
 };
+
+export enum UserSortKey {
+  ID = "ID",
+  USERNAME = "USERNAME",
+  EMAIL = "EMAIL",
+}
 
 export type UserUpdateInput = {
   id: Scalars["ID"];
@@ -477,6 +484,7 @@ export type ResolversTypes = {
   UserCreateResponse: ResolverTypeWrapper<UserCreateResponse>;
   UserEdge: ResolverTypeWrapper<UserEdge>;
   UserError: ResolverTypeWrapper<UserError>;
+  UserSortKey: UserSortKey;
   UserUpdateInput: UserUpdateInput;
   UserUpdateResponse: ResolverTypeWrapper<UserUpdateResponse>;
   Votable:

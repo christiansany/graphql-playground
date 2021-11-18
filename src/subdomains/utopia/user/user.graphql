@@ -7,7 +7,14 @@ type Query {
     before: String
     after: String
     query: String
+    sortKey: UserSortKey
   ): UserConnection!
+}
+
+enum UserSortKey {
+  ID
+  USERNAME
+  EMAIL
 }
 
 type Mutation {
