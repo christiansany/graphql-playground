@@ -27,6 +27,7 @@ type Mutation {
 input UserCreateInput {
   username: String!
   email: String!
+  height: Int!
 }
 
 type UserCreateResponse {

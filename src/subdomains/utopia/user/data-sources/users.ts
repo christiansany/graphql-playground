@@ -13,9 +13,18 @@ import {
 import btoa from "btoa";
 import atob from "atob";
 
-const parseCursor: (endodedString: string) => [string, string | undefined] = (
-  endodedString
-) => atob(endodedString).split(":");
+const parseCursor: (endodedString: string) => string[] = (endodedString) =>
+  atob(endodedString).split(":");
+
+interface SortFieldConfig<T> {
+  field: keyof T;
+  parseValue?: (value: string) => any; // tslint:disable-line no-any
+  unique?: boolean;
+}
+
+interface ISortFieldConfigs<T> {
+  [key: string]: SortFieldConfig<T>;
+}
 
 // function generatePaginationQuery(query, sort, nextKey) {
 //   const sortField = sort == null ? null : sort[0];
@@ -79,7 +88,7 @@ export default class UsersAPI extends MongoDataSource<UserDocument> {
     last,
     before,
     query,
-    sortKey,
+    sortKey = UserSortKey.ID, // This would not be necessary cuz it's in the schema, but... typescript eneds this
     reverse,
   }: QueryUsersArgs): Promise<SourceUserConnection> {
     const collection: Collection<UserDocument> = this.collection;
@@ -87,6 +96,9 @@ export default class UsersAPI extends MongoDataSource<UserDocument> {
     if (!first && !last) {
       throw new Error("TODO: Errormessage -> !first && !last");
     }
+
+    // ... Typescript ...
+    sortKey = sortKey || UserSortKey.ID;
 
     console.log({ reverse, sortKey });
 
@@ -110,7 +122,7 @@ export default class UsersAPI extends MongoDataSource<UserDocument> {
     };
 
     let sort: Sort;
-    let sortField: keyof UserDocument | undefined;
+    // let sortField: keyof UserDocument | undefined;
 
     // enum Actions {
     //   EQUALS = "EQUALS",
@@ -152,13 +164,7 @@ export default class UsersAPI extends MongoDataSource<UserDocument> {
     // If there are things inside the query, that are not allowed, we provide errors that can be sent as a response to the consumer
     // const { parsedQuery, errors } = queryParser(query);
 
-    // const { sort, sortKeys} = createSortingStuff({sortFields: [{
-    //   field: "username",
-    //   type: "string",
-    //   unique: false
-    // }]})
-
-    const sortConfigs = {
+    const sortFieldConfigs: ISortFieldConfigs<UserDocument> = {
       [UserSortKey.ID]: {
         field: "_id",
         unique: true,
@@ -172,55 +178,101 @@ export default class UsersAPI extends MongoDataSource<UserDocument> {
       },
       [UserSortKey.HEIGHT]: {
         field: "height",
+        parseValue: (value: string) => Number(value),
       },
     };
 
-    switch (sortKey) {
-      case UserSortKey.ID:
-        sortField = "_id"; // This is actually  not needed
-        break;
-      case UserSortKey.USERNAME:
-        sortField = "username";
-        break;
-      case UserSortKey.EMAIL:
-        sortField = "email";
-        break;
-      case UserSortKey.HEIGHT:
-        sortField = "height";
-        break;
-    }
+    const {
+      field: sortField,
+      unique: sortFieldIsUnique = false,
+      parseValue: sortFieldParser,
+    } = sortFieldConfigs[sortKey];
 
     const createCursor = (doc: UserDocument) =>
       btoa(`${doc._id.toString()}:${sortField ? doc[sortField] : null}`);
 
-    if (sortField && sortField !== "_id") {
-      sort = first ? { [sortField]: 1, _id: 1 } : { [sortField]: -1, _id: -1 };
+    const sortConfigs = {
+      ascending: !reverse
+        ? ({ sort: 1, operator: "$gt" } as const)
+        : ({ sort: -1, operator: "$lt" } as const),
+      decending: !reverse
+        ? ({ sort: -1, operator: "$lt" } as const)
+        : ({ sort: 1, operator: "$gt" } as const),
+    };
+
+    if (sortField && sortField !== "_id" && !sortFieldIsUnique) {
+      sort = first
+        ? {
+            [sortField]: sortConfigs.ascending.sort,
+            _id: sortConfigs.ascending.sort,
+          }
+        : {
+            [sortField]: sortConfigs.decending.sort,
+            _id: sortConfigs.decending.sort,
+          };
+    } else if (sortField && sortField !== "_id" && sortFieldIsUnique) {
+      sort = first
+        ? { [sortField]: sortConfigs.ascending.sort }
+        : { [sortField]: sortConfigs.decending.sort };
     } else {
-      sort = first ? { _id: 1 } : { _id: -1 };
+      sort = first
+        ? { _id: sortConfigs.ascending.sort }
+        : { _id: sortConfigs.decending.sort };
     }
 
-    const sortOperator = first ? "$gt" : "$lt";
+    const sortOperator = first
+      ? sortConfigs.ascending.operator
+      : sortConfigs.decending.operator;
     let paginationQuery = {};
 
     if (after || before) {
       // TODO fix as
       const [id, sortFieldValue] = parseCursor(after || (before as string));
 
-      // TODO: When quierying a unique field, this could be optimized to be faster
-      paginationQuery =
-        sortField && sortField !== "_id"
-          ? {
-              $or: [
-                { [sortField]: { [sortOperator]: sortFieldValue } },
+      // TODO: This is super shitty to read
+      if (
+        sortField &&
+        sortField !== "_id" &&
+        sortFieldValue &&
+        !sortFieldIsUnique
+      ) {
+        paginationQuery = {
+          $or: [
+            {
+              [sortField]: {
+                [sortOperator]: sortFieldParser
+                  ? sortFieldParser(sortFieldValue)
+                  : sortFieldValue,
+              },
+            },
+            {
+              $and: [
                 {
-                  $and: [
-                    { [sortField]: sortFieldValue },
-                    { _id: { [sortOperator]: id } },
-                  ],
+                  [sortField]: sortFieldParser
+                    ? sortFieldParser(sortFieldValue)
+                    : sortFieldValue,
                 },
+                { _id: { [sortOperator]: id } },
               ],
-            }
-          : { _id: { [sortOperator]: id } };
+            },
+          ],
+        };
+      } else if (
+        sortField &&
+        sortField !== "_id" &&
+        sortFieldValue &&
+        sortFieldIsUnique
+      ) {
+        paginationQuery = {
+          [sortField]: {
+            [sortOperator]: sortFieldParser
+              ? sortFieldParser(sortFieldValue)
+              : sortFieldValue,
+          },
+        };
+      } else {
+        paginationQuery = { _id: { [sortOperator]: id } };
+      }
     }
 
     if (after) {
@@ -232,6 +284,8 @@ export default class UsersAPI extends MongoDataSource<UserDocument> {
 
     // TODO Fix as
     const limit = first ? first : (last as number);
+
+    console.log({ paginationQuery: JSON.stringify(paginationQuery) });
 
     dataset = collection
       .find({ $and: [options, paginationQuery] })

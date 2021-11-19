@@ -43,6 +43,8 @@
     "@graphql-codegen/cli": "1.17.10",
     "@graphql-codegen/typescript": "1.17.10",
     "@graphql-codegen/typescript-resolvers": "1.17.10",
+    "@types/atob": "^2.1.2",
+    "@types/btoa": "^1.2.3",
     "@types/cookie-parser": "1.4.2",
     "@types/graphql": "14.5.0",
     "@types/graphql-depth-limit": "1.1.2",

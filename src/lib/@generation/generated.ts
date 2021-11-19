@@ -259,6 +259,7 @@ export type UserConnection = Connection & {
 export type UserCreateInput = {
   username: Scalars["String"];
   email: Scalars["String"];
+  height: Scalars["Int"];
 };
 
 export type UserCreateResponse = {
