@@ -12,9 +12,18 @@ import {
 } from "./users.types";
 import btoa from "btoa";
 import atob from "atob";
+import { createQueryParseFn } from "./query";
 
 const parseCursor: (endodedString: string) => string[] = (endodedString) =>
   atob(endodedString).split(":");
+
+// enum Actions {
+//   EQUALS = "EQUALS",
+//   LESS_THAN = "LESS_THAN",
+//   LESS_THAN_OR_EQUAL_TO = "LESS_THAN_OR_EQUAL_TO",
+//   GREATER_THAN = "GREATER_THAN",
+//   GREATER_THAN_OR_EQUAL_TO = "GREATER_THAN_OR_EQUAL_TO",
+// }
 
 interface SortFieldConfig<T> {
   field: keyof T;
@@ -25,55 +34,6 @@ interface SortFieldConfig<T> {
 interface ISortFieldConfigs<T> {
   [key: string]: SortFieldConfig<T>;
 }
-
-// function generatePaginationQuery(query, sort, nextKey) {
-//   const sortField = sort == null ? null : sort[0];
-
-//   function nextKeyFn(items) {
-//     if (items.length === 0) {
-//       return null;
-//     }
-
-//     const item = items[items.length - 1];
-
-//     if (sortField == null) {
-//       return { _id: item._id };
-//     }
-
-//     return { _id: item._id, [sortField]: item[sortField] };
-//   }
-
-//   if (nextKey == null) {
-//     return { query, nextKeyFn };
-//   }
-
-//   let paginatedQuery = query;
-
-//   if (sort == null) {
-//     paginatedQuery._id = { $gt: nextKey._id };
-//     return { paginatedQuery, nextKey };
-//   }
-
-//   const sortOperator = sort[1] === 1 ? "$gt" : "$lt";
-
-//   const paginationQuery = [
-//     { [sortField]: { [sortOperator]: nextKey[sortField] } },
-//     {
-//       $and: [
-//         { [sortField]: nextKey[sortField] },
-//         { _id: { [sortOperator]: nextKey._id } },
-//       ],
-//     },
-//   ];
-
-//   if (paginatedQuery.$or == null) {
-//     paginatedQuery.$or = paginationQuery;
-//   } else {
-//     paginatedQuery = { $and: [query, { $or: paginationQuery }] };
-//   }
-
-//   return { paginatedQuery, nextKeyFn };
-// }
 
 export default class UsersAPI extends MongoDataSource<UserDocument> {
   public async getUserById(
@@ -95,19 +55,53 @@ export default class UsersAPI extends MongoDataSource<UserDocument> {
 
     if (!first && !last) {
       throw new Error("TODO: Errormessage -> !first && !last");
+    } else if (first && before) {
+      throw new Error("TODO: Errormessage -> first && before");
+    } else if (last && after) {
+      throw new Error("TODO: Errormessage -> last && after");
     }
 
     // ... Typescript ...
     sortKey = sortKey || UserSortKey.ID;
 
-    console.log({ reverse, sortKey });
-
     // TODO: Validation of the args and potential throw when not good.
-    // - Either first or last msut be set
-    // - after can only be used in combination with first
-    // - before can only be used in combination with last
     // - query parser that throws if a query is invalid
     //   - Maybe there can be a debug mode, where in dev mode more information is given about the error
+
+    const fitlerQuery = createQueryParseFn<UserDocument>({
+      // When there is no field specified in the query, but only a search term is provided
+      searchTermFields: ["username", "email"],
+      searchFields: [
+        { field: "username", type: "string" },
+        { field: "email", type: "string" },
+        { field: "height", type: "number" },
+      ],
+      // fieldSearchFields: [
+      //   {
+      //     fieldName: "username",
+      //     // type: "string", // ?? How
+      //     // allowedActions: [Actions.EQUALS],
+      //   },
+      //   {
+      //     fieldName: "email",
+      //     // type: "string", // ?? How
+      //     // allowedActions: [Actions.EQUALS],
+      //   },
+      //   {
+      //     fieldName: "age",
+      //     type: "int", // ?? How
+      //     // allowedActions: [
+      //     //   Actions.EQUALS,
+      //     //   Actions.LESS_THAN,
+      //     //   Actions.LESS_THAN_OR_EQUAL_TO,
+      //     //   Actions.GREATER_THAN,
+      //     //   Actions.GREATER_THAN_OR_EQUAL_TO,
+      //     // ],
+      //   },
+      // ],
+    })(query);
+
+    console.log({ fitlerQuery: JSON.stringify(fitlerQuery) });
 
     let hasPreviousPage = false;
     let hasNextPage = false;
@@ -117,56 +111,12 @@ export default class UsersAPI extends MongoDataSource<UserDocument> {
     let data: UserDocument[] = [];
     let dataset: FindCursor<UserDocument>;
 
-    let options: Filter<UserDocument> = {
-      // email: { $eq: "alligator0@gmail.com" },
-    };
-
     let sort: Sort;
-    // let sortField: keyof UserDocument | undefined;
-
-    // enum Actions {
-    //   EQUALS = "EQUALS",
-    //   LESS_THAN = "LESS_THAN",
-    //   LESS_THAN_OR_EQUAL_TO = "LESS_THAN_OR_EQUAL_TO",
-    //   GREATER_THAN = "GREATER_THAN",
-    //   GREATER_THAN_OR_EQUAL_TO = "GREATER_THAN_OR_EQUAL_TO",
-    // }
-
-    // const queryParser = createQueryParser({
-    //   // When there is no field specified in the query, but only a search term is provided
-    //   termSearchFields: ["username", "email"],
-    //   //
-    //   fieldSearchFields: [
-    //     {
-    //       fieldName: "username",
-    //       type: "string", // ?? How
-    //       allowedActions: [Actions.EQUALS],
-    //     },
-    //     {
-    //       fieldName: "email",
-    //       type: "string", // ?? How
-    //       allowedActions: [Actions.EQUALS],
-    //     },
-    //     {
-    //       fieldName: "age",
-    //       type: "int", // ?? How
-    //       allowedActions: [
-    //         Actions.EQUALS,
-    //         Actions.LESS_THAN,
-    //         Actions.LESS_THAN_OR_EQUAL_TO,
-    //         Actions.GREATER_THAN,
-    //         Actions.GREATER_THAN_OR_EQUAL_TO,
-    //       ],
-    //     },
-    //   ],
-    // });
-
-    // If there are things inside the query, that are not allowed, we provide errors that can be sent as a response to the consumer
-    // const { parsedQuery, errors } = queryParser(query);
 
     const sortFieldConfigs: ISortFieldConfigs<UserDocument> = {
       [UserSortKey.ID]: {
         field: "_id",
+        parseValue: (value: string) => new ObjectId(value),
         unique: true,
       },
       [UserSortKey.USERNAME]: {
@@ -223,7 +173,8 @@ export default class UsersAPI extends MongoDataSource<UserDocument> {
     const sortOperator = first
       ? sortConfigs.ascending.operator
       : sortConfigs.decending.operator;
-    let paginationQuery = {};
+
+    let paginationQuery: Filter<UserDocument> = {};
 
     if (after || before) {
       // TODO fix as
@@ -267,7 +218,7 @@ export default class UsersAPI extends MongoDataSource<UserDocument> {
           },
         };
       } else {
-        paginationQuery = { _id: { [sortOperator]: id } };
+        paginationQuery = { _id: { [sortOperator]: new ObjectId(id) } };
       }
     }
 
@@ -278,11 +229,17 @@ export default class UsersAPI extends MongoDataSource<UserDocument> {
       hasNextPage = true;
     }
 
+    console.log({
+      fitlerQuery: JSON.stringify(fitlerQuery),
+      paginationQuery: JSON.stringify(paginationQuery),
+      sort,
+    });
+
     // TODO Fix as
     const limit = first ? first : (last as number);
 
     dataset = collection
-      .find({ $and: [options, paginationQuery] })
+      .find({ $and: [fitlerQuery, paginationQuery] })
       .sort(sort)
       .limit(limit + 1);
     data = await dataset.toArray();

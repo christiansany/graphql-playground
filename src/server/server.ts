@@ -9,7 +9,7 @@ const uri = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWOR
 const client = new MongoClient(uri);
 client.connect().then(() => {
   // tslint:disable-next-line
-  console.log(`🚀  Connected to Mongo Cluster`);
+  console.log(`🌿  Connected to Mongo Cluster`);
 
   client.db().collection("users").createIndex({ _id: 1, height: 1 });
   client.db().collection("users").createIndex({ _id: 1, username: 1 });
