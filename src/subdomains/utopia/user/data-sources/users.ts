@@ -164,6 +164,8 @@ export default class UsersAPI extends MongoDataSource<UserDocument> {
     // If there are things inside the query, that are not allowed, we provide errors that can be sent as a response to the consumer
     // const { parsedQuery, errors } = queryParser(query);
 
+    // TODO: Somethign is not working correctly when reversing the height and the using last & before
+
     const sortFieldConfigs: ISortFieldConfigs<UserDocument> = {
       [UserSortKey.ID]: {
         field: "_id",
