@@ -164,8 +164,6 @@ export default class UsersAPI extends MongoDataSource<UserDocument> {
     // If there are things inside the query, that are not allowed, we provide errors that can be sent as a response to the consumer
     // const { parsedQuery, errors } = queryParser(query);
 
-    // TODO: Somethign is not working correctly when reversing the height and the using last & before
-
     const sortFieldConfigs: ISortFieldConfigs<UserDocument> = {
       [UserSortKey.ID]: {
         field: "_id",
@@ -248,14 +246,10 @@ export default class UsersAPI extends MongoDataSource<UserDocument> {
               },
             },
             {
-              $and: [
-                {
-                  [sortField]: sortFieldParser
-                    ? sortFieldParser(sortFieldValue)
-                    : sortFieldValue,
-                },
-                { _id: { [sortOperator]: id } },
-              ],
+              [sortField]: sortFieldParser
+                ? sortFieldParser(sortFieldValue)
+                : sortFieldValue,
+              _id: { [sortOperator]: new ObjectId(id) },
             },
           ],
         };
@@ -287,8 +281,6 @@ export default class UsersAPI extends MongoDataSource<UserDocument> {
     // TODO Fix as
     const limit = first ? first : (last as number);
 
-    console.log({ paginationQuery: JSON.stringify(paginationQuery) });
-
     dataset = collection
       .find({ $and: [options, paginationQuery] })
       .sort(sort)
@@ -307,11 +299,6 @@ export default class UsersAPI extends MongoDataSource<UserDocument> {
       // This also corrects the start and end cursor
       data.reverse();
     }
-
-    // TODO: This doesn't work at all... the whole sorting must be switched
-    // if (reverse) {
-    //   data.reverse();
-    // }
 
     startCursor = data.length ? createCursor(data[0]) : null;
     endCursor = data.length ? createCursor(data[data.length - 1]) : null;
