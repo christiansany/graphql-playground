@@ -40,7 +40,7 @@ export default class UsersAPI extends MongoDataSource<UserDocument> {
     last,
     before,
     query,
-    sortKey = UserSortKey.ID, // This would not be necessary cuz it's in the schema, but... typescript eneds this
+    sortKey = UserSortKey.ID, // This would not be necessary cuz it's in the schema, but... typescript needs this
     reverse,
   }: QueryUsersArgs): Promise<SourceUserConnection> {
     const collection: Collection<UserDocument> = this.collection;
@@ -56,10 +56,7 @@ export default class UsersAPI extends MongoDataSource<UserDocument> {
     // ... Typescript ...
     sortKey = sortKey || UserSortKey.ID;
 
-    // TODO: Validation of the args and potential throw when not good.
-    // - query parser that throws if a query is invalid
-    //   - Maybe there can be a debug mode, where in dev mode more information is given about the error
-
+    // TODO: Unify parser functions
     const fitlerQuery = createParseQueryFn<UserDocument>({
       // When there is no field specified in the query, but only a search term is provided
       searchTermFields: ["username", "email"],
@@ -70,16 +67,7 @@ export default class UsersAPI extends MongoDataSource<UserDocument> {
       ],
     })(query);
 
-    let hasPreviousPage = false;
-    let hasNextPage = false;
-    let startCursor;
-    let endCursor;
-
-    let data: UserDocument[] = [];
-    let dataset: FindCursor<UserDocument>;
-
-    let sort: Sort;
-
+    // TODO: Unify parser functions
     const sortFieldConfigs: ISortFieldConfigs<UserDocument> = {
       [UserSortKey.ID]: {
         field: "_id",
@@ -98,6 +86,27 @@ export default class UsersAPI extends MongoDataSource<UserDocument> {
         parseValue: (value: string) => Number(value),
       },
     };
+
+    // const { data, ...pageInfo } = await createPaginationFn<UserDocument>(
+    //   sortFieldConfigs
+    // )({
+    //   first,
+    //   after,
+    //   last,
+    //   before,
+    //   sortKey,
+    //   reverse,
+    // });
+
+    let hasPreviousPage = false;
+    let hasNextPage = false;
+    let startCursor;
+    let endCursor;
+
+    let data: UserDocument[] = [];
+    let dataset: FindCursor<UserDocument>;
+
+    let sort: Sort;
 
     const {
       field: sortField,
@@ -229,9 +238,7 @@ export default class UsersAPI extends MongoDataSource<UserDocument> {
 
     const connectionResponse: SourceUserConnection = {
       edges: data.map((user) => ({
-        node: {
-          ...user,
-        },
+        node: user,
         cursor: createCursor(user),
       })),
       pageInfo: {
