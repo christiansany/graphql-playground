@@ -12,18 +12,10 @@ import {
 } from "./users.types";
 import btoa from "btoa";
 import atob from "atob";
-import { createQueryParseFn } from "./query";
+import { createParseQueryFn } from "./query";
 
 const parseCursor: (endodedString: string) => string[] = (endodedString) =>
   atob(endodedString).split(":");
-
-// enum Actions {
-//   EQUALS = "EQUALS",
-//   LESS_THAN = "LESS_THAN",
-//   LESS_THAN_OR_EQUAL_TO = "LESS_THAN_OR_EQUAL_TO",
-//   GREATER_THAN = "GREATER_THAN",
-//   GREATER_THAN_OR_EQUAL_TO = "GREATER_THAN_OR_EQUAL_TO",
-// }
 
 interface SortFieldConfig<T> {
   field: keyof T;
@@ -68,7 +60,7 @@ export default class UsersAPI extends MongoDataSource<UserDocument> {
     // - query parser that throws if a query is invalid
     //   - Maybe there can be a debug mode, where in dev mode more information is given about the error
 
-    const fitlerQuery = createQueryParseFn<UserDocument>({
+    const fitlerQuery = createParseQueryFn<UserDocument>({
       // When there is no field specified in the query, but only a search term is provided
       searchTermFields: ["username", "email"],
       searchFields: [
@@ -76,32 +68,7 @@ export default class UsersAPI extends MongoDataSource<UserDocument> {
         { field: "email", type: "string" },
         { field: "height", type: "number" },
       ],
-      // fieldSearchFields: [
-      //   {
-      //     fieldName: "username",
-      //     // type: "string", // ?? How
-      //     // allowedActions: [Actions.EQUALS],
-      //   },
-      //   {
-      //     fieldName: "email",
-      //     // type: "string", // ?? How
-      //     // allowedActions: [Actions.EQUALS],
-      //   },
-      //   {
-      //     fieldName: "age",
-      //     type: "int", // ?? How
-      //     // allowedActions: [
-      //     //   Actions.EQUALS,
-      //     //   Actions.LESS_THAN,
-      //     //   Actions.LESS_THAN_OR_EQUAL_TO,
-      //     //   Actions.GREATER_THAN,
-      //     //   Actions.GREATER_THAN_OR_EQUAL_TO,
-      //     // ],
-      //   },
-      // ],
     })(query);
-
-    console.log({ fitlerQuery: JSON.stringify(fitlerQuery) });
 
     let hasPreviousPage = false;
     let hasNextPage = false;
