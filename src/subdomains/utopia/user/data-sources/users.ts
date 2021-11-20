@@ -206,12 +206,6 @@ export default class UsersAPI extends MongoDataSource<UserDocument> {
       hasNextPage = true;
     }
 
-    console.log({
-      fitlerQuery: JSON.stringify(fitlerQuery),
-      paginationQuery: JSON.stringify(paginationQuery),
-      sort,
-    });
-
     // TODO Fix as
     const limit = first ? first : (last as number);
 
