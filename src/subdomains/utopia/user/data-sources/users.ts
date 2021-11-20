@@ -45,6 +45,7 @@ export default class UsersAPI extends MongoDataSource<UserDocument> {
   }: QueryUsersArgs): Promise<SourceUserConnection> {
     const collection: Collection<UserDocument> = this.collection;
 
+    // TODO These can be moved to a better place too...
     if (!first && !last) {
       throw new Error("TODO: Errormessage -> !first && !last");
     } else if (first && before) {

@@ -119,10 +119,72 @@ describe("Parse single filter queries", () => {
   });
 });
 
-// describe("createParseQueryFn", () => {
-//   const parseQuery = createParseQueryFn<Document>({
-//     // When there is no field specified in the query, but only a search term is provided
-//     searchTermFields: ["stringField"],
-//     searchFields,
-//   });
-// });
+describe("createParseQueryFn", () => {
+  const parseQuery = createParseQueryFn<Document>({
+    searchTermFields: ["stringField"],
+    searchFields,
+  });
+
+  test("Simple queries are parsed correctly", () => {
+    const parsedQuery = parseQuery("stringField:*");
+
+    expect(parsedQuery).toEqual({
+      stringField: {
+        $exists: true,
+      },
+    });
+  });
+
+  test("Complex queries are parsed correctly", () => {
+    const parsedQuery = parseQuery(
+      "(stringField:* AND (stringField:* OR stringField:*)) OR (stringField:* OR stringField:*) OR stringField:*"
+    );
+
+    expect(parsedQuery).toEqual({
+      $or: [
+        {
+          $and: [
+            {
+              stringField: {
+                $exists: true,
+              },
+            },
+            {
+              $or: [
+                {
+                  stringField: {
+                    $exists: true,
+                  },
+                },
+                {
+                  stringField: {
+                    $exists: true,
+                  },
+                },
+              ],
+            },
+          ],
+        },
+        {
+          $or: [
+            {
+              stringField: {
+                $exists: true,
+              },
+            },
+            {
+              stringField: {
+                $exists: true,
+              },
+            },
+          ],
+        },
+        {
+          stringField: {
+            $exists: true,
+          },
+        },
+      ],
+    });
+  });
+});
