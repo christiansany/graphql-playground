@@ -16,7 +16,7 @@ const searchFields = [
   // { field: "datetimeField", type: "datetime" } as const,
 ];
 
-// TODO: Describe these tests better
+// TODO: Describe these tests better & Naming of tests
 describe("Parse single filter queries", () => {
   const parseFilter = createParseFilterFn(searchFields);
   test("Throws when trying to search in a field not permitted or not existing", () => {
@@ -30,6 +30,19 @@ describe("Parse single filter queries", () => {
       const filter = parseFilter(`${searchField.field}:*`);
       expect(filter).toEqual({ [searchField.field]: { $exists: true } });
     });
+  });
+
+  test("Throws when 'field exists' is used incorrectly", () => {
+    expect(() => parseFilter("stringField:*")).not.toThrowError();
+    expect(() => parseFilter("stringField-:*")).not.toThrowError();
+    expect(() => parseFilter("stringField:>*")).toThrowError();
+    expect(() => parseFilter("stringField:>=*")).toThrowError();
+    expect(() => parseFilter("stringField:<*")).toThrowError();
+    expect(() => parseFilter("stringField:<=*")).toThrowError();
+    expect(() => parseFilter("stringField-:>*")).toThrowError();
+    expect(() => parseFilter("stringField-:>=*")).toThrowError();
+    expect(() => parseFilter("stringField-:<*")).toThrowError();
+    expect(() => parseFilter("stringField-:<=*")).toThrowError();
   });
 
   test("parses stringField ':' (is equal) string correctly", () => {

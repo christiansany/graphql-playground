@@ -35,22 +35,25 @@ const parseValue = (value: string, type: Type) => {
   }
 };
 
+// TODO: Move to a better place
+type Comparator = ":" | ":>" | ":>=" | ":<" | ":<=";
+
 // TODO: Naming is shit here
 export const createParseFilterFn = <T>(
   searchFields: Array<ISearchField<T>>
 ) => (condition: string): Filter<T> => {
   const match = condition.match(/^(\w*)(-?)(:|:>|:<|:>=|:<=)?(\w*|\*)$/i);
   if (!match) {
-    throw new Error("TODO");
+    throw new Error("TODO: Faulty condition provided");
   }
 
   const [_, fieldName, not, comparator, value] = match;
 
   // TODO: Error handling
   // TODO: - Thorw an error when the $exists special case is used outside of : or -:
-
-  // TODO: Move to a better place
-  type Comparator = ":" | ":>" | ":>=" | ":<" | ":<=";
+  if (comparator !== ":" && value === "*") {
+    throw new Error("TODO: comperator is not usable with");
+  }
 
   let operator: "$eq" | "$gt" | "$gte" | "$lt" | "$lte";
 
@@ -114,6 +117,9 @@ export const createParseQueryFn = <T>({
   return (query: Maybe<string> | undefined): Filter<T> => {
     if (!query) return {};
 
+    // TODO: Split groups by parsing ()
+    // TODO: Split whitespaces, but not inside of quotes
+
     // TODO: Use regex to avoid matching strings like 'example with space' (including '')
     const filters = query.split(" ").map(parseFitler);
 
@@ -132,10 +138,6 @@ export const createParseQueryFn = <T>({
     // return { $or: [...aaa] };
 
     // TODO: Parse Connectives -> https://shopify.dev/api/usage/search-syntax#connectives
-    // TODO: Parse Modifier -> https://shopify.dev/api/usage/search-syntax#modifier
-    // TODO: Parse Comparators -> https://shopify.dev/api/usage/search-syntax#comparators
-    // TODO: Parse fields
-    // TODO: Parse field-values
     // return {};
   };
 };
