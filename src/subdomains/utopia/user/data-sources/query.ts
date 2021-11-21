@@ -13,14 +13,6 @@ interface ICreateQueryParserOptions<T> {
   searchFields: Array<ISearchField<T>>;
 }
 
-// enum Actions {
-//   EQUALS = "EQUALS",
-//   LESS_THAN = "LESS_THAN",
-//   LESS_THAN_OR_EQUAL_TO = "LESS_THAN_OR_EQUAL_TO",
-//   GREATER_THAN = "GREATER_THAN",
-//   GREATER_THAN_OR_EQUAL_TO = "GREATER_THAN_OR_EQUAL_TO",
-// }
-
 const parseValue = (value: string, type: Type) => {
   switch (type) {
     case "string":
