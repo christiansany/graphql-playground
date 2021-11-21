@@ -7,8 +7,8 @@ type Query {
     before: String
     after: String
     query: String
-    sortKey: UserSortKey = ID
-    reverse: Boolean = false
+    sortKey: UserSortKey! = ID
+    reverse: Boolean! = false
   ): UserConnection!
 }
 

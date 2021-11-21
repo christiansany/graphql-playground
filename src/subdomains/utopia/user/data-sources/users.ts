@@ -43,6 +43,55 @@ export default class UsersAPI extends MongoDataSource<UserDocument> {
       throw new Error("TODO: Errormessage -> last && after");
     }
 
+    // const queryData = createMongoDbQueryAndPaginationFn({
+    //   fields: [
+    //     {
+    //       name: "_id",
+    //       searchable: false,
+    //       sortable: true,
+    //       unique: true,
+    //       parser: (value: string) => new ObjectId(value),
+    //     },
+    //     {
+    //       name: "username",
+    //       searchable: true,
+    //       sortable: true,
+    //       unique: false,
+    //       // parser: (value: string) => value,
+    //     },
+    //     {
+    //       name: "email",
+    //       searchable: true,
+    //       sortable: true,
+    //       unique: true,
+    //       // parser: (value: string) => value,
+    //     },
+    //     {
+    //       name: "height",
+    //       searchable: true,
+    //       sortable: true,
+    //       unique: false,
+    //       parser: (value: string) => Number(value),
+    //     },
+    //   ],
+    //   sortKeyMap: {
+    //     [UserSortKey.ID]: "_id",
+    //     [UserSortKey.USERNAME]: "username",
+    //     [UserSortKey.EMAIL]: "email",
+    //     [UserSortKey.HEIGHT]: "height",
+    //   },
+    // });
+
+    // const connectionResponse2 = queryData({
+    //   first,
+    //   after,
+    //   last,
+    //   before,
+    //   query,
+    //   sortKey,
+    //   reverse,
+    // });
+
     // TODO: Unify parser functions
     const fitlerQuery = createParseQueryFn<UserDocument>({
       // When there is no field specified in the query, but only a search term is provided

@@ -219,7 +219,7 @@ export type QueryUsersArgs = {
   before?: Maybe<Scalars["String"]>;
   after?: Maybe<Scalars["String"]>;
   query?: Maybe<Scalars["String"]>;
-  sortKey?: Maybe<UserSortKey>;
+  sortKey?: UserSortKey;
   reverse?: Maybe<Scalars["Boolean"]>;
 };
 
