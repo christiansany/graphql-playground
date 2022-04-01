@@ -42,7 +42,7 @@ export const createParseFilterFn = <T>(
   const [_, fieldName, not, comparator, value] = match;
 
   // TODO: Error handling
-  // TODO: - Thorw an error when the $exists special case is used outside of : or -:
+  // TODO: - Throw an error when the $exists special case is used outside of : or -:
   if (comparator !== ":" && value === "*") {
     throw new Error("TODO: comperator is not usable with");
   }
