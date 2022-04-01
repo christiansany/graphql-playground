@@ -12,13 +12,24 @@ import {
   SourceUserCreateResponse,
   SourceUserUpdateResponse,
 } from "./users.types";
-import { createParseQueryFn } from "./query";
-import { createPaginatedMongoDBDataFn, ISortFieldConfigs } from "./pagination";
+import { createParseQueryFn } from "../../../tools/query";
+import {
+  createPaginatedMongoDBDataFn,
+  ISortFieldConfigs,
+} from "../../../tools/pagination";
+
+const filter = createParseQueryFn<UserDocument>({
+  // When there is no field specified in the query, but only a search term is provided
+  searchTermFields: ["username", "email"],
+  searchFields: [
+    { field: "username", type: "string" },
+    { field: "email", type: "string" },
+    { field: "height", type: "number" },
+  ],
+});
 
 export default class UsersAPI extends MongoDataSource<UserDocument> {
-  public async getUserById(
-    id: ObjectId
-  ): Promise<UserDocument | null | undefined> {
+  public async getById(id: ObjectId): Promise<UserDocument | null | undefined> {
     return this.findOneById(id);
   }
 
@@ -45,65 +56,8 @@ export default class UsersAPI extends MongoDataSource<UserDocument> {
       throw new Error("TODO: Errormessage -> last && after");
     }
 
-    // const queryData = createMongoDbQueryAndPaginationFn({
-    //   fields: [
-    //     {
-    //       name: "_id",
-    //       searchable: false,
-    //       sortable: true,
-    //       unique: true,
-    //       parser: (value: string) => new ObjectId(value),
-    //     },
-    //     {
-    //       name: "username",
-    //       searchable: true,
-    //       sortable: true,
-    //       unique: false,
-    //       // parser: (value: string) => value,
-    //     },
-    //     {
-    //       name: "email",
-    //       searchable: true,
-    //       sortable: true,
-    //       unique: true,
-    //       // parser: (value: string) => value,
-    //     },
-    //     {
-    //       name: "height",
-    //       searchable: true,
-    //       sortable: true,
-    //       unique: false,
-    //       parser: (value: string) => Number(value),
-    //     },
-    //   ],
-    //   sortKeyMap: {
-    //     [UserSortKey.ID]: "_id",
-    //     [UserSortKey.USERNAME]: "username",
-    //     [UserSortKey.EMAIL]: "email",
-    //     [UserSortKey.HEIGHT]: "height",
-    //   },
-    // });
-
-    // const connectionResponse2 = queryData({
-    //   first,
-    //   after,
-    //   last,
-    //   before,
-    //   query,
-    //   sortKey,
-    //   reverse,
-    // });
-
     // TODO: Unify parser functions
-    const fitlerQuery = createParseQueryFn<UserDocument>({
-      // When there is no field specified in the query, but only a search term is provided
-      searchTermFields: ["username", "email"],
-      searchFields: [
-        { field: "username", type: "string" },
-        { field: "email", type: "string" },
-        { field: "height", type: "number" },
-      ],
-    })(query);
+    const fitlerQuery = filter(query);
 
     // TODO: Unify parser functions
     const sortFieldConfigs: ISortFieldConfigs<UserDocument> = {
@@ -177,16 +131,22 @@ export default class UsersAPI extends MongoDataSource<UserDocument> {
   ): Promise<SourceUserUpdateResponse> {
     const collection: Collection<UserDocument> = this.collection;
     const { id, ...rest } = input;
-    // TODO These could be parallelize to enhance performance
+    const user = await collection.findOne({ _id: new ObjectId(id) });
+
+    if (!user) {
+      return {
+        userErrors: [
+          {
+            message: "User not found",
+          },
+        ],
+      };
+    }
+
     await collection.updateOne(
       { _id: new ObjectId(id) },
       { $set: { ...rest } }
     );
-    const user = await collection.findOne({ _id: new ObjectId(id) });
-
-    if (!user) {
-      throw new Error("User not found!!! Wooooot");
-    }
 
     return {
       userErrors: [],

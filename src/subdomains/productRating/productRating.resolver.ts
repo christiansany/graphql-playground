@@ -36,10 +36,8 @@ export default {
     creator: (
       source: any,
       _: never,
-      { dataSources }: GraphQLCustomResolversContext
-    ) => {
-      return dataSources.users.getUserById(source.creator.toString());
-    },
+      { dataSources: { users } }: GraphQLCustomResolversContext
+    ) => users.getById(source.creator.toString()),
   },
   User: {
     productRatings: (
