@@ -2,6 +2,7 @@ import {
   QueryUserArgs,
   QueryUsersArgs,
   UserCreateInput,
+  UserUpdateInput,
 } from "@generation/generated";
 import { GraphQLCustomResolversContext } from "src/server/types";
 import { ObjectId } from "mongodb";
@@ -41,6 +42,13 @@ export default {
       { dataSources }: GraphQLCustomResolversContext
     ) => {
       return dataSources.users.createUser(input);
+    },
+    userUpdate: (
+      _: never,
+      { input }: { input: UserUpdateInput },
+      { dataSources }: GraphQLCustomResolversContext
+    ) => {
+      return dataSources.users.updateUser(input);
     },
   },
   User: {

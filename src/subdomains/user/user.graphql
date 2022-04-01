@@ -37,9 +37,9 @@ type UserCreateResponse {
 
 input UserUpdateInput {
   id: ID!
-  username: String!
-  email: String!
-  height: Int!
+  username: String
+  email: String
+  height: Int
 }
 
 type UserUpdateResponse {

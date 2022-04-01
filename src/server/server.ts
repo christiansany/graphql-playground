@@ -1,16 +1,12 @@
 import DataLoaders from "src/subdomains/dataLoaders";
 import { resolvers, typeDefs } from "./schema";
 import { ApolloServer } from "apollo-server";
-import { MongoClient, ServerApiVersion } from "mongodb";
+import { MongoClient } from "mongodb";
 
-import UsersAPI from "../subdomains/utopia/user/data-sources/users";
+import UsersAPI from "../subdomains/user/data-sources/users";
 
 const uri = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@cluster0.xr1op.mongodb.net/${process.env.MONGO_DB}?retryWrites=true&w=majority`;
-const client = new MongoClient(uri, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-  serverApi: ServerApiVersion.v1,
-});
+const client = new MongoClient(uri);
 client.connect().then(() => {
   // tslint:disable-next-line
   console.log(`🌿  Connected to Mongo Cluster`);

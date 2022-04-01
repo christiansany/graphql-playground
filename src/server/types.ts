@@ -1,4 +1,4 @@
-import UsersAPI from "../subdomains/utopia/user/data-sources/users";
+import UsersAPI from "../subdomains/user/data-sources/users";
 import DataLoaders from "../subdomains/dataLoaders";
 
 export interface GraphQLCustomDataSources {

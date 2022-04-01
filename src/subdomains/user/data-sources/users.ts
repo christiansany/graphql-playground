@@ -2,6 +2,7 @@ import {
   QueryUsersArgs,
   UserCreateInput,
   UserSortKey,
+  UserUpdateInput,
 } from "@generation/generated";
 import { MongoDataSource } from "apollo-datasource-mongodb";
 import { ObjectId, Collection } from "mongodb";
@@ -9,6 +10,7 @@ import {
   UserDocument,
   SourceUserConnection,
   SourceUserCreateResponse,
+  SourceUserUpdateResponse,
 } from "./users.types";
 import { createParseQueryFn } from "./query";
 import { createPaginatedMongoDBDataFn, ISortFieldConfigs } from "./pagination";
@@ -166,6 +168,30 @@ export default class UsersAPI extends MongoDataSource<UserDocument> {
       user: {
         _id: result.insertedId,
         ...doc,
+      },
+    };
+  }
+
+  public async updateUser(
+    input: UserUpdateInput
+  ): Promise<SourceUserUpdateResponse> {
+    const collection: Collection<UserDocument> = this.collection;
+    const { id, ...rest } = input;
+    // TODO These could be parallelize to enhance performance
+    await collection.updateOne(
+      { _id: new ObjectId(id) },
+      { $set: { ...rest } }
+    );
+    const user = await collection.findOne({ _id: new ObjectId(id) });
+
+    if (!user) {
+      throw new Error("User not found!!! Wooooot");
+    }
+
+    return {
+      userErrors: [],
+      user: {
+        ...user,
       },
     };
   }

@@ -1,12 +1,12 @@
 import createProductDataLoaders, {
   ProductDataLoaders,
-} from "./utopia/product/dataloader";
+} from "./product/dataloader";
 import createProductRatingDataLoaders, {
   ProductRatingDataLoaders,
-} from "./utopia/productRating/dataloader";
+} from "./productRating/dataloader";
 import createProductRatingCommentDataLoaders, {
   ProductRatingCommentDataLoaders,
-} from "./utopia/productRatingComment/dataloader";
+} from "./productRatingComment/dataloader";
 
 export default class DataLoaders {
   public Product: ProductDataLoaders;
