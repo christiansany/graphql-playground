@@ -46,8 +46,18 @@ export type Edge = {
 };
 
 export type Mutation = {
+  productCreate?: Maybe<ProductCreateResponse>;
+  productUpdate?: Maybe<ProductUpdateResponse>;
   userCreate?: Maybe<UserCreateResponse>;
   userUpdate?: Maybe<UserUpdateResponse>;
+};
+
+export type MutationProductCreateArgs = {
+  input?: Maybe<ProductCreateInput>;
+};
+
+export type MutationProductUpdateArgs = {
+  input?: Maybe<ProductUpdateInput>;
 };
 
 export type MutationUserCreateArgs = {
@@ -63,30 +73,42 @@ export type Node = {
 };
 
 export type PageInfo = {
-  hasPreviousPage: Scalars["Boolean"];
-  hasNextPage: Scalars["Boolean"];
-  startCursor?: Maybe<Scalars["String"]>;
   endCursor?: Maybe<Scalars["String"]>;
+  hasNextPage: Scalars["Boolean"];
+  hasPreviousPage: Scalars["Boolean"];
+  startCursor?: Maybe<Scalars["String"]>;
 };
 
 export type Product = Node & {
   description: Scalars["String"];
   id: Scalars["ID"];
   name: Scalars["String"];
+  price: Scalars["Int"];
   productRatings: ProductRatingConnection;
   productRatingsSummary: ProductRatingsSummary;
 };
 
 export type ProductProductRatingsArgs = {
+  after?: Maybe<Scalars["String"]>;
+  before?: Maybe<Scalars["String"]>;
   first?: Maybe<Scalars["Int"]>;
   last?: Maybe<Scalars["Int"]>;
-  before?: Maybe<Scalars["String"]>;
-  after?: Maybe<Scalars["String"]>;
 };
 
 export type ProductConnection = Connection & {
   edges: ProductEdge[];
   pageInfo: PageInfo;
+};
+
+export type ProductCreateInput = {
+  description: Scalars["String"];
+  name: Scalars["String"];
+  price: Scalars["Int"];
+};
+
+export type ProductCreateResponse = {
+  product?: Maybe<Product>;
+  userErrors: UserError[];
 };
 
 export type ProductEdge = Edge & {
@@ -116,25 +138,25 @@ export type ProductRating = Contribution &
   };
 
 export type ProductRatingCommentsArgs = {
+  after?: Maybe<Scalars["String"]>;
+  before?: Maybe<Scalars["String"]>;
   first?: Maybe<Scalars["Int"]>;
   last?: Maybe<Scalars["Int"]>;
-  before?: Maybe<Scalars["String"]>;
-  after?: Maybe<Scalars["String"]>;
 };
 
-export type ProductRatingComment = Node &
+export type ProductRatingComment = Contribution &
+  Node &
   Timestamps &
-  Votable &
-  Contribution & {
+  Votable & {
+    creator: User;
     id: Scalars["ID"];
-    text: Scalars["String"];
-    rating: ProductRating;
     insertDate: Scalars["DateTime"];
     lastActivityDate: Scalars["DateTime"];
-    votesSummary: VotesSummary;
-    votes: Vote[];
+    rating: ProductRating;
+    text: Scalars["String"];
     userVote?: Maybe<Vote>;
-    creator: User;
+    votes: Vote[];
+    votesSummary: VotesSummary;
   };
 
 export type ProductRatingCommentConnection = Connection & {
@@ -162,6 +184,23 @@ export type ProductRatingsSummary = {
   totalRatings: Scalars["Int"];
 };
 
+export enum ProductSortKey {
+  ID = "ID",
+  PRICE = "PRICE",
+}
+
+export type ProductUpdateInput = {
+  description?: Maybe<Scalars["String"]>;
+  id: Scalars["ID"];
+  name?: Maybe<Scalars["String"]>;
+  price?: Maybe<Scalars["Int"]>;
+};
+
+export type ProductUpdateResponse = {
+  product?: Maybe<Product>;
+  userErrors: UserError[];
+};
+
 export type Query = {
   me?: Maybe<User>;
   product?: Maybe<Product>;
@@ -187,26 +226,28 @@ export type QueryProductRatingCommentArgs = {
 };
 
 export type QueryProductRatingCommentsArgs = {
+  after?: Maybe<Scalars["String"]>;
+  before?: Maybe<Scalars["String"]>;
   first?: Maybe<Scalars["Int"]>;
   last?: Maybe<Scalars["Int"]>;
-  before?: Maybe<Scalars["String"]>;
-  after?: Maybe<Scalars["String"]>;
 };
 
 export type QueryProductRatingsArgs = {
+  after?: Maybe<Scalars["String"]>;
+  before?: Maybe<Scalars["String"]>;
   first?: Maybe<Scalars["Int"]>;
   last?: Maybe<Scalars["Int"]>;
-  before?: Maybe<Scalars["String"]>;
-  after?: Maybe<Scalars["String"]>;
   query?: Maybe<Scalars["String"]>;
 };
 
 export type QueryProductsArgs = {
+  after?: Maybe<Scalars["String"]>;
+  before?: Maybe<Scalars["String"]>;
   first?: Maybe<Scalars["Int"]>;
   last?: Maybe<Scalars["Int"]>;
-  before?: Maybe<Scalars["String"]>;
-  after?: Maybe<Scalars["String"]>;
   query?: Maybe<Scalars["String"]>;
+  reverse?: Scalars["Boolean"];
+  sortKey?: ProductSortKey;
 };
 
 export type QueryUserArgs = {
@@ -214,13 +255,13 @@ export type QueryUserArgs = {
 };
 
 export type QueryUsersArgs = {
+  after?: Maybe<Scalars["String"]>;
+  before?: Maybe<Scalars["String"]>;
   first?: Maybe<Scalars["Int"]>;
   last?: Maybe<Scalars["Int"]>;
-  before?: Maybe<Scalars["String"]>;
-  after?: Maybe<Scalars["String"]>;
   query?: Maybe<Scalars["String"]>;
+  reverse?: Scalars["Boolean"];
   sortKey?: UserSortKey;
-  reverse?: Maybe<Scalars["Boolean"]>;
 };
 
 export type Timestamps = {
@@ -238,17 +279,17 @@ export type User = Node & {
 };
 
 export type UserProductRatingCommentsArgs = {
+  after?: Maybe<Scalars["String"]>;
+  before?: Maybe<Scalars["String"]>;
   first?: Maybe<Scalars["Int"]>;
   last?: Maybe<Scalars["Int"]>;
-  before?: Maybe<Scalars["String"]>;
-  after?: Maybe<Scalars["String"]>;
 };
 
 export type UserProductRatingsArgs = {
+  after?: Maybe<Scalars["String"]>;
+  before?: Maybe<Scalars["String"]>;
   first?: Maybe<Scalars["Int"]>;
   last?: Maybe<Scalars["Int"]>;
-  before?: Maybe<Scalars["String"]>;
-  after?: Maybe<Scalars["String"]>;
 };
 
 export type UserConnection = Connection & {
@@ -257,14 +298,14 @@ export type UserConnection = Connection & {
 };
 
 export type UserCreateInput = {
-  username: Scalars["String"];
   email: Scalars["String"];
   height: Scalars["Int"];
+  username: Scalars["String"];
 };
 
 export type UserCreateResponse = {
-  userErrors: UserError[];
   user?: Maybe<User>;
+  userErrors: UserError[];
 };
 
 export type UserEdge = Edge & {
@@ -278,50 +319,50 @@ export type UserError = DisplayableError & {
 };
 
 export enum UserSortKey {
-  ID = "ID",
-  USERNAME = "USERNAME",
   EMAIL = "EMAIL",
   HEIGHT = "HEIGHT",
+  ID = "ID",
+  USERNAME = "USERNAME",
 }
 
 export type UserUpdateInput = {
+  email?: Maybe<Scalars["String"]>;
+  height?: Maybe<Scalars["Int"]>;
   id: Scalars["ID"];
-  username: Scalars["String"];
-  email: Scalars["String"];
-  height: Scalars["Int"];
+  username?: Maybe<Scalars["String"]>;
 };
 
 export type UserUpdateResponse = {
-  userErrors: UserError[];
   user?: Maybe<User>;
+  userErrors: UserError[];
 };
 
 export type Votable = {
-  votesSummary: VotesSummary;
-  votes: Vote[];
   userVote?: Maybe<Vote>;
+  votes: Vote[];
+  votesSummary: VotesSummary;
 };
 
 export type Vote = Timestamps & {
   id: Scalars["ID"];
-  user: User;
-  type: VoteType;
   insertDate: Scalars["DateTime"];
   lastActivityDate: Scalars["DateTime"];
+  type: VoteType;
+  user: User;
+};
+
+export type VotesSummary = {
+  abusiveVoteCount: Scalars["Int"];
+  downVoteCount: Scalars["Int"];
+  upVoteCount: Scalars["Int"];
+  voteScore: Scalars["Int"];
 };
 
 export enum VoteType {
-  UpVote = "UpVote",
-  DownVote = "DownVote",
   AbusiveVote = "AbusiveVote",
+  DownVote = "DownVote",
+  UpVote = "UpVote",
 }
-
-export type VotesSummary = {
-  voteScore: Scalars["Int"];
-  upVoteCount: Scalars["Int"];
-  downVoteCount: Scalars["Int"];
-  abusiveVoteCount: Scalars["Int"];
-};
 
 export type ResolverTypeWrapper<T> = Promise<T> | T;
 
@@ -439,6 +480,7 @@ export type DirectiveResolverFn<
 
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = {
+  Boolean: ResolverTypeWrapper<Scalars["Boolean"]>;
   Connection:
     | ResolversTypes["ProductConnection"]
     | ResolversTypes["ProductRatingCommentConnection"]
@@ -450,25 +492,26 @@ export type ResolversTypes = {
   Date: ResolverTypeWrapper<Scalars["Date"]>;
   DateTime: ResolverTypeWrapper<Scalars["DateTime"]>;
   DisplayableError: ResolversTypes["UserError"];
-  String: ResolverTypeWrapper<Scalars["String"]>;
   Edge:
     | ResolversTypes["ProductEdge"]
     | ResolversTypes["ProductRatingCommentEdge"]
     | ResolversTypes["ProductRatingEdge"]
     | ResolversTypes["UserEdge"];
+  Float: ResolverTypeWrapper<Scalars["Float"]>;
   HTML: ResolverTypeWrapper<Scalars["HTML"]>;
+  ID: ResolverTypeWrapper<Scalars["ID"]>;
+  Int: ResolverTypeWrapper<Scalars["Int"]>;
   Mutation: ResolverTypeWrapper<{}>;
   Node:
     | ResolversTypes["Product"]
     | ResolversTypes["ProductRating"]
     | ResolversTypes["ProductRatingComment"]
     | ResolversTypes["User"];
-  ID: ResolverTypeWrapper<Scalars["ID"]>;
   PageInfo: ResolverTypeWrapper<PageInfo>;
-  Boolean: ResolverTypeWrapper<Scalars["Boolean"]>;
   Product: ResolverTypeWrapper<Product>;
-  Int: ResolverTypeWrapper<Scalars["Int"]>;
   ProductConnection: ResolverTypeWrapper<ProductConnection>;
+  ProductCreateInput: ProductCreateInput;
+  ProductCreateResponse: ResolverTypeWrapper<ProductCreateResponse>;
   ProductEdge: ResolverTypeWrapper<ProductEdge>;
   ProductRating: ResolverTypeWrapper<ProductRating>;
   ProductRatingComment: ResolverTypeWrapper<ProductRatingComment>;
@@ -477,8 +520,11 @@ export type ResolversTypes = {
   ProductRatingConnection: ResolverTypeWrapper<ProductRatingConnection>;
   ProductRatingEdge: ResolverTypeWrapper<ProductRatingEdge>;
   ProductRatingsSummary: ResolverTypeWrapper<ProductRatingsSummary>;
-  Float: ResolverTypeWrapper<Scalars["Float"]>;
+  ProductSortKey: ProductSortKey;
+  ProductUpdateInput: ProductUpdateInput;
+  ProductUpdateResponse: ResolverTypeWrapper<ProductUpdateResponse>;
   Query: ResolverTypeWrapper<{}>;
+  String: ResolverTypeWrapper<Scalars["String"]>;
   Timestamps:
     | ResolversTypes["ProductRating"]
     | ResolversTypes["ProductRatingComment"]
@@ -496,12 +542,13 @@ export type ResolversTypes = {
     | ResolversTypes["ProductRating"]
     | ResolversTypes["ProductRatingComment"];
   Vote: ResolverTypeWrapper<Vote>;
-  VoteType: VoteType;
   VotesSummary: ResolverTypeWrapper<VotesSummary>;
+  VoteType: VoteType;
 };
 
 /** Mapping between all available schema types and the resolvers parents */
 export type ResolversParentTypes = {
+  Boolean: Scalars["Boolean"];
   Connection:
     | ResolversParentTypes["ProductConnection"]
     | ResolversParentTypes["ProductRatingCommentConnection"]
@@ -513,25 +560,26 @@ export type ResolversParentTypes = {
   Date: Scalars["Date"];
   DateTime: Scalars["DateTime"];
   DisplayableError: ResolversParentTypes["UserError"];
-  String: Scalars["String"];
   Edge:
     | ResolversParentTypes["ProductEdge"]
     | ResolversParentTypes["ProductRatingCommentEdge"]
     | ResolversParentTypes["ProductRatingEdge"]
     | ResolversParentTypes["UserEdge"];
+  Float: Scalars["Float"];
   HTML: Scalars["HTML"];
+  ID: Scalars["ID"];
+  Int: Scalars["Int"];
   Mutation: {};
   Node:
     | ResolversParentTypes["Product"]
     | ResolversParentTypes["ProductRating"]
     | ResolversParentTypes["ProductRatingComment"]
     | ResolversParentTypes["User"];
-  ID: Scalars["ID"];
   PageInfo: PageInfo;
-  Boolean: Scalars["Boolean"];
   Product: Product;
-  Int: Scalars["Int"];
   ProductConnection: ProductConnection;
+  ProductCreateInput: ProductCreateInput;
+  ProductCreateResponse: ProductCreateResponse;
   ProductEdge: ProductEdge;
   ProductRating: ProductRating;
   ProductRatingComment: ProductRatingComment;
@@ -540,8 +588,10 @@ export type ResolversParentTypes = {
   ProductRatingConnection: ProductRatingConnection;
   ProductRatingEdge: ProductRatingEdge;
   ProductRatingsSummary: ProductRatingsSummary;
-  Float: Scalars["Float"];
+  ProductUpdateInput: ProductUpdateInput;
+  ProductUpdateResponse: ProductUpdateResponse;
   Query: {};
+  String: Scalars["String"];
   Timestamps:
     | ResolversParentTypes["ProductRating"]
     | ResolversParentTypes["ProductRatingComment"]
@@ -637,6 +687,18 @@ export type MutationResolvers<
   ContextType = GraphQLCustomResolversContext,
   ParentType extends ResolversParentTypes["Mutation"] = ResolversParentTypes["Mutation"]
 > = {
+  productCreate?: Resolver<
+    Maybe<ResolversTypes["ProductCreateResponse"]>,
+    ParentType,
+    ContextType,
+    RequireFields<MutationProductCreateArgs, never>
+  >;
+  productUpdate?: Resolver<
+    Maybe<ResolversTypes["ProductUpdateResponse"]>,
+    ParentType,
+    ContextType,
+    RequireFields<MutationProductUpdateArgs, never>
+  >;
   userCreate?: Resolver<
     Maybe<ResolversTypes["UserCreateResponse"]>,
     ParentType,
@@ -667,18 +729,18 @@ export type PageInfoResolvers<
   ContextType = GraphQLCustomResolversContext,
   ParentType extends ResolversParentTypes["PageInfo"] = ResolversParentTypes["PageInfo"]
 > = {
+  endCursor?: Resolver<
+    Maybe<ResolversTypes["String"]>,
+    ParentType,
+    ContextType
+  >;
+  hasNextPage?: Resolver<ResolversTypes["Boolean"], ParentType, ContextType>;
   hasPreviousPage?: Resolver<
     ResolversTypes["Boolean"],
     ParentType,
     ContextType
   >;
-  hasNextPage?: Resolver<ResolversTypes["Boolean"], ParentType, ContextType>;
   startCursor?: Resolver<
-    Maybe<ResolversTypes["String"]>,
-    ParentType,
-    ContextType
-  >;
-  endCursor?: Resolver<
     Maybe<ResolversTypes["String"]>,
     ParentType,
     ContextType
@@ -693,6 +755,7 @@ export type ProductResolvers<
   description?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
   id?: Resolver<ResolversTypes["ID"], ParentType, ContextType>;
   name?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
+  price?: Resolver<ResolversTypes["Int"], ParentType, ContextType>;
   productRatings?: Resolver<
     ResolversTypes["ProductRatingConnection"],
     ParentType,
@@ -717,6 +780,19 @@ export type ProductConnectionResolvers<
     ContextType
   >;
   pageInfo?: Resolver<ResolversTypes["PageInfo"], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type ProductCreateResponseResolvers<
+  ContextType = GraphQLCustomResolversContext,
+  ParentType extends ResolversParentTypes["ProductCreateResponse"] = ResolversParentTypes["ProductCreateResponse"]
+> = {
+  product?: Resolver<Maybe<ResolversTypes["Product"]>, ParentType, ContextType>;
+  userErrors?: Resolver<
+    Array<ResolversTypes["UserError"]>,
+    ParentType,
+    ContextType
+  >;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -780,23 +856,23 @@ export type ProductRatingCommentResolvers<
   ContextType = GraphQLCustomResolversContext,
   ParentType extends ResolversParentTypes["ProductRatingComment"] = ResolversParentTypes["ProductRatingComment"]
 > = {
+  creator?: Resolver<ResolversTypes["User"], ParentType, ContextType>;
   id?: Resolver<ResolversTypes["ID"], ParentType, ContextType>;
-  text?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
-  rating?: Resolver<ResolversTypes["ProductRating"], ParentType, ContextType>;
   insertDate?: Resolver<ResolversTypes["DateTime"], ParentType, ContextType>;
   lastActivityDate?: Resolver<
     ResolversTypes["DateTime"],
     ParentType,
     ContextType
   >;
+  rating?: Resolver<ResolversTypes["ProductRating"], ParentType, ContextType>;
+  text?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
+  userVote?: Resolver<Maybe<ResolversTypes["Vote"]>, ParentType, ContextType>;
+  votes?: Resolver<Array<ResolversTypes["Vote"]>, ParentType, ContextType>;
   votesSummary?: Resolver<
     ResolversTypes["VotesSummary"],
     ParentType,
     ContextType
   >;
-  votes?: Resolver<Array<ResolversTypes["Vote"]>, ParentType, ContextType>;
-  userVote?: Resolver<Maybe<ResolversTypes["Vote"]>, ParentType, ContextType>;
-  creator?: Resolver<ResolversTypes["User"], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -857,6 +933,19 @@ export type ProductRatingsSummaryResolvers<
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type ProductUpdateResponseResolvers<
+  ContextType = GraphQLCustomResolversContext,
+  ParentType extends ResolversParentTypes["ProductUpdateResponse"] = ResolversParentTypes["ProductUpdateResponse"]
+> = {
+  product?: Resolver<Maybe<ResolversTypes["Product"]>, ParentType, ContextType>;
+  userErrors?: Resolver<
+    Array<ResolversTypes["UserError"]>,
+    ParentType,
+    ContextType
+  >;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type QueryResolvers<
   ContextType = GraphQLCustomResolversContext,
   ParentType extends ResolversParentTypes["Query"] = ResolversParentTypes["Query"]
@@ -896,7 +985,7 @@ export type QueryResolvers<
     ResolversTypes["ProductConnection"],
     ParentType,
     ContextType,
-    RequireFields<QueryProductsArgs, never>
+    RequireFields<QueryProductsArgs, "reverse" | "sortKey">
   >;
   user?: Resolver<
     Maybe<ResolversTypes["User"]>,
@@ -908,7 +997,7 @@ export type QueryResolvers<
     ResolversTypes["UserConnection"],
     ParentType,
     ContextType,
-    RequireFields<QueryUsersArgs, "sortKey" | "reverse">
+    RequireFields<QueryUsersArgs, "reverse" | "sortKey">
   >;
 };
 
@@ -965,12 +1054,12 @@ export type UserCreateResponseResolvers<
   ContextType = GraphQLCustomResolversContext,
   ParentType extends ResolversParentTypes["UserCreateResponse"] = ResolversParentTypes["UserCreateResponse"]
 > = {
+  user?: Resolver<Maybe<ResolversTypes["User"]>, ParentType, ContextType>;
   userErrors?: Resolver<
     Array<ResolversTypes["UserError"]>,
     ParentType,
     ContextType
   >;
-  user?: Resolver<Maybe<ResolversTypes["User"]>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -1000,12 +1089,12 @@ export type UserUpdateResponseResolvers<
   ContextType = GraphQLCustomResolversContext,
   ParentType extends ResolversParentTypes["UserUpdateResponse"] = ResolversParentTypes["UserUpdateResponse"]
 > = {
+  user?: Resolver<Maybe<ResolversTypes["User"]>, ParentType, ContextType>;
   userErrors?: Resolver<
     Array<ResolversTypes["UserError"]>,
     ParentType,
     ContextType
   >;
-  user?: Resolver<Maybe<ResolversTypes["User"]>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -1018,13 +1107,13 @@ export type VotableResolvers<
     ParentType,
     ContextType
   >;
+  userVote?: Resolver<Maybe<ResolversTypes["Vote"]>, ParentType, ContextType>;
+  votes?: Resolver<Array<ResolversTypes["Vote"]>, ParentType, ContextType>;
   votesSummary?: Resolver<
     ResolversTypes["VotesSummary"],
     ParentType,
     ContextType
   >;
-  votes?: Resolver<Array<ResolversTypes["Vote"]>, ParentType, ContextType>;
-  userVote?: Resolver<Maybe<ResolversTypes["Vote"]>, ParentType, ContextType>;
 };
 
 export type VoteResolvers<
@@ -1032,14 +1121,14 @@ export type VoteResolvers<
   ParentType extends ResolversParentTypes["Vote"] = ResolversParentTypes["Vote"]
 > = {
   id?: Resolver<ResolversTypes["ID"], ParentType, ContextType>;
-  user?: Resolver<ResolversTypes["User"], ParentType, ContextType>;
-  type?: Resolver<ResolversTypes["VoteType"], ParentType, ContextType>;
   insertDate?: Resolver<ResolversTypes["DateTime"], ParentType, ContextType>;
   lastActivityDate?: Resolver<
     ResolversTypes["DateTime"],
     ParentType,
     ContextType
   >;
+  type?: Resolver<ResolversTypes["VoteType"], ParentType, ContextType>;
+  user?: Resolver<ResolversTypes["User"], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -1047,10 +1136,10 @@ export type VotesSummaryResolvers<
   ContextType = GraphQLCustomResolversContext,
   ParentType extends ResolversParentTypes["VotesSummary"] = ResolversParentTypes["VotesSummary"]
 > = {
-  voteScore?: Resolver<ResolversTypes["Int"], ParentType, ContextType>;
-  upVoteCount?: Resolver<ResolversTypes["Int"], ParentType, ContextType>;
-  downVoteCount?: Resolver<ResolversTypes["Int"], ParentType, ContextType>;
   abusiveVoteCount?: Resolver<ResolversTypes["Int"], ParentType, ContextType>;
+  downVoteCount?: Resolver<ResolversTypes["Int"], ParentType, ContextType>;
+  upVoteCount?: Resolver<ResolversTypes["Int"], ParentType, ContextType>;
+  voteScore?: Resolver<ResolversTypes["Int"], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -1067,6 +1156,7 @@ export type Resolvers<ContextType = GraphQLCustomResolversContext> = {
   PageInfo?: PageInfoResolvers<ContextType>;
   Product?: ProductResolvers<ContextType>;
   ProductConnection?: ProductConnectionResolvers<ContextType>;
+  ProductCreateResponse?: ProductCreateResponseResolvers<ContextType>;
   ProductEdge?: ProductEdgeResolvers<ContextType>;
   ProductRating?: ProductRatingResolvers<ContextType>;
   ProductRatingComment?: ProductRatingCommentResolvers<ContextType>;
@@ -1075,6 +1165,7 @@ export type Resolvers<ContextType = GraphQLCustomResolversContext> = {
   ProductRatingConnection?: ProductRatingConnectionResolvers<ContextType>;
   ProductRatingEdge?: ProductRatingEdgeResolvers<ContextType>;
   ProductRatingsSummary?: ProductRatingsSummaryResolvers<ContextType>;
+  ProductUpdateResponse?: ProductUpdateResponseResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
   Timestamps?: TimestampsResolvers<ContextType>;
   User?: UserResolvers<ContextType>;

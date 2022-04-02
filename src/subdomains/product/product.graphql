@@ -6,13 +6,21 @@ type Query {
     before: String
     after: String
     query: String
+    sortKey: ProductSortKey! = ID
+    reverse: Boolean! = false
   ): ProductConnection!
+}
+
+enum ProductSortKey {
+  ID
+  PRICE
 }
 
 type Product implements Node {
   id: ID!
   name: String!
   description: String!
+  price: Float!
 }
 
 type ProductEdge implements Edge {
@@ -23,4 +31,32 @@ type ProductEdge implements Edge {
 type ProductConnection implements Connection {
   edges: [ProductEdge!]!
   pageInfo: PageInfo!
+}
+
+type Mutation {
+  productCreate(input: ProductCreateInput): ProductCreateResponse
+  productUpdate(input: ProductUpdateInput): ProductUpdateResponse
+}
+
+input ProductCreateInput {
+  name: String!
+  description: String!
+  price: Int!
+}
+
+type ProductCreateResponse {
+  userErrors: [UserError!]!
+  product: Product
+}
+
+input ProductUpdateInput {
+  id: ID!
+  name: String
+  description: String
+  price: Int
+}
+
+type ProductUpdateResponse {
+  userErrors: [UserError!]!
+  product: Product
 }

@@ -1,55 +1,50 @@
 import {
-  QueryUsersArgs,
-  UserCreateInput,
-  UserSortKey,
-  UserUpdateInput,
+  ProductCreateInput,
+  ProductSortKey,
+  ProductUpdateInput,
+  QueryProductsArgs,
 } from "@generation/generated";
 import { MongoDataSource } from "apollo-datasource-mongodb";
 import { ObjectId, Collection } from "mongodb";
 import {
-  UserDocument,
-  SourceUserConnection,
-  SourceUserCreateResponse,
-  SourceUserUpdateResponse,
-} from "./users.types";
+  ProductDocument,
+  SourceProductCreateResponse,
+  SourceProductUpdateResponse,
+  SourceProductConnection,
+} from "./product.types";
 import { createParseQueryFn } from "../../../tools/query";
 import {
   createPaginatedMongoDBDataFn,
   ISortFieldConfigs,
 } from "../../../tools/pagination";
 
-const filter = createParseQueryFn<UserDocument>({
+const filter = createParseQueryFn<ProductDocument>({
   // When there is no field specified in the query, but only a search term is provided
-  searchTermFields: ["username", "email"],
+  searchTermFields: ["name", "description"],
   searchFields: [
-    { field: "username", type: "string" },
-    { field: "email", type: "string" },
-    { field: "height", type: "number" },
+    { field: "name", type: "string" },
+    { field: "description", type: "string" },
+    { field: "price", type: "number" },
   ],
 });
 
 // TODO: Unify parser functions
-const sortFieldConfigs: ISortFieldConfigs<UserDocument> = {
-  [UserSortKey.ID]: {
+const sortFieldConfigs: ISortFieldConfigs<ProductDocument> = {
+  [ProductSortKey.ID]: {
     field: "_id",
     parseValue: (value: string) => new ObjectId(value),
     unique: true,
   },
-  [UserSortKey.USERNAME]: {
-    field: "username",
-  },
-  [UserSortKey.EMAIL]: {
-    field: "email",
-    unique: true,
-  },
-  [UserSortKey.HEIGHT]: {
-    field: "height",
+  [ProductSortKey.PRICE]: {
+    field: "price",
     parseValue: (value: string) => Number(value),
   },
 };
 
-export default class UsersAPI extends MongoDataSource<UserDocument> {
-  public async getById(id: ObjectId): Promise<UserDocument | null | undefined> {
+export default class ProductsAPI extends MongoDataSource<ProductDocument> {
+  public async getById(
+    id: ObjectId
+  ): Promise<ProductDocument | null | undefined> {
     return this.findOneById(id);
   }
 
@@ -59,10 +54,10 @@ export default class UsersAPI extends MongoDataSource<UserDocument> {
     last,
     before,
     query,
-    sortKey = UserSortKey.ID,
+    sortKey = ProductSortKey.ID,
     reverse = false,
-  }: QueryUsersArgs): Promise<SourceUserConnection> {
-    const collection: Collection<UserDocument> = this.collection;
+  }: QueryProductsArgs): Promise<SourceProductConnection> {
+    const collection: Collection<ProductDocument> = this.collection;
 
     // TODO These can be moved to a better place too...
     if (!first && !last) {
@@ -77,8 +72,8 @@ export default class UsersAPI extends MongoDataSource<UserDocument> {
     const fitlerQuery = filter(query);
 
     const connectionResponse = await createPaginatedMongoDBDataFn<
-      UserDocument,
-      UserSortKey
+      ProductDocument,
+      ProductSortKey
     >(
       collection,
       sortFieldConfigs
@@ -95,46 +90,35 @@ export default class UsersAPI extends MongoDataSource<UserDocument> {
     return connectionResponse;
   }
 
-  public async createUser(
-    input: UserCreateInput
-  ): Promise<SourceUserCreateResponse> {
-    const collection: Collection<UserDocument> = this.collection;
-    const existingUser = await collection.findOne({ email: input.email });
-
-    if (existingUser) {
-      return {
-        userErrors: [
-          {
-            message: "User already exists",
-          },
-        ],
-      };
-    }
+  public async createProduct(
+    input: ProductCreateInput
+  ): Promise<SourceProductCreateResponse> {
+    const collection: Collection<ProductDocument> = this.collection;
 
     const doc = { ...input };
     const result = await collection.insertOne(doc);
 
     return {
       userErrors: [],
-      user: {
+      product: {
         _id: result.insertedId,
         ...doc,
       },
     };
   }
 
-  public async updateUser(
-    input: UserUpdateInput
-  ): Promise<SourceUserUpdateResponse> {
-    const collection: Collection<UserDocument> = this.collection;
+  public async updateProduct(
+    input: ProductUpdateInput
+  ): Promise<SourceProductUpdateResponse> {
+    const collection: Collection<ProductDocument> = this.collection;
     const { id, ...rest } = input;
-    const user = await collection.findOne({ _id: new ObjectId(id) });
+    const product = await collection.findOne({ _id: new ObjectId(id) });
 
-    if (!user) {
+    if (!product) {
       return {
         userErrors: [
           {
-            message: "User not found",
+            message: "Product not found",
           },
         ],
       };
@@ -147,8 +131,8 @@ export default class UsersAPI extends MongoDataSource<UserDocument> {
 
     return {
       userErrors: [],
-      user: {
-        ...user,
+      product: {
+        ...product,
       },
     };
   }

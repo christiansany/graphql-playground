@@ -7,6 +7,11 @@ import {
 import { GraphQLCustomResolversContext } from "src/server/types";
 import { ObjectId } from "mongodb";
 import { UserDocument } from "./data-sources/users.types";
+import { dataSourcesHelpers } from "src/tools/data-sources-helper";
+
+const dataSourcesHelper = dataSourcesHelpers<QueryUserArgs, QueryUsersArgs>(
+  "users"
+);
 
 export default {
   Query: {
@@ -18,16 +23,8 @@ export default {
       // TODO Pretending to read user id from context
       return users.getById(new ObjectId("6190f2fb58ae481e2c235fd8"));
     },
-    user: (
-      _: never,
-      { id }: QueryUserArgs,
-      { dataSources: { users } }: GraphQLCustomResolversContext
-    ) => users.getById(new ObjectId(id)),
-    users: (
-      _: never,
-      connection: QueryUsersArgs,
-      { dataSources: { users } }: GraphQLCustomResolversContext
-    ) => users.getUsersByConnection(connection),
+    user: dataSourcesHelper.getById,
+    users: dataSourcesHelper.getByConnection,
   },
   Mutation: {
     userCreate: (

@@ -1,24 +1,36 @@
 import {
-  QueryProductRatingArgs,
-  QueryProductRatingsArgs,
+  ProductCreateInput,
+  ProductUpdateInput,
+  QueryProductArgs,
+  QueryProductsArgs,
 } from "@generation/generated";
 import { GraphQLCustomResolversContext } from "src/server/types";
+import { dataSourcesHelpers } from "src/tools/data-sources-helper";
+import { ProductDocument } from "./data-sources/product.types";
+
+const dataSourcesHelper = dataSourcesHelpers<
+  QueryProductArgs,
+  QueryProductsArgs
+>("products");
 
 export default {
   Query: {
-    product: (
+    product: dataSourcesHelper.getById,
+    products: dataSourcesHelper.getByConnection,
+  },
+  Mutation: {
+    productCreate: (
       _: never,
-      { id }: QueryProductRatingArgs,
-      context: GraphQLCustomResolversContext
-    ) => {
-      return context.dataLoaders.Product.byId.load(id);
-    },
-    products: (
+      { input }: { input: ProductCreateInput },
+      { dataSources: { products } }: GraphQLCustomResolversContext
+    ) => products.createProduct(input),
+    productUpdate: (
       _: never,
-      connection: QueryProductRatingsArgs,
-      context: GraphQLCustomResolversContext
-    ) => {
-      return context.dataLoaders.Product.byConnection.load(connection);
-    },
+      { input }: { input: ProductUpdateInput },
+      { dataSources: { products } }: GraphQLCustomResolversContext
+    ) => products.updateProduct(input),
+  },
+  Product: {
+    id: (parent: ProductDocument) => parent._id,
   },
 };
