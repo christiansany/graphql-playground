@@ -10,6 +10,21 @@ import {
   Document,
 } from "mongodb";
 
+export const validatePaginationArgs = ({
+  first,
+  after,
+  last,
+  before,
+}: Pick<PaginationArgs<any, any>, "first" | "after" | "last" | "before">) => {
+  if (!first && !last) {
+    throw new Error("TODO: Errormessage -> !first && !last");
+  } else if (first && before) {
+    throw new Error("TODO: Errormessage -> first && before");
+  } else if (last && after) {
+    throw new Error("TODO: Errormessage -> last && after");
+  }
+};
+
 const parseCursor: (endodedString: string) => string[] = (endodedString) =>
   atob(endodedString).split(":");
 

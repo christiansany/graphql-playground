@@ -15,7 +15,7 @@ client.connect().then(async () => {
   // This should be moved to the the user data sources
   client.db().collection("users").createIndex({ _id: 1, height: 1 });
   client.db().collection("users").createIndex({ _id: 1, username: 1 });
-  client.db().collection("users").createIndex({ email: 1 });
+  client.db().collection("users").createIndex({ email: 1 }, { unique: true });
 
   // This should be moved to the products data sources
   client.db().collection("products").createIndex({ _id: 1, price: 1 });

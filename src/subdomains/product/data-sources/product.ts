@@ -2,6 +2,7 @@ import {
   ProductCreateInput,
   ProductSortKey,
   ProductUpdateInput,
+  QueryProductArgs,
   QueryProductsArgs,
 } from "@generation/generated";
 import { MongoDataSource } from "apollo-datasource-mongodb";
@@ -16,9 +17,10 @@ import { createParseQueryFn } from "../../../tools/query";
 import {
   createPaginatedMongoDBDataFn,
   ISortFieldConfigs,
+  validatePaginationArgs,
 } from "../../../tools/pagination";
 
-const filter = createParseQueryFn<ProductDocument>({
+const createFilterQuery = createParseQueryFn<ProductDocument>({
   // When there is no field specified in the query, but only a search term is provided
   searchTermFields: ["name", "description"],
   searchFields: [
@@ -28,7 +30,6 @@ const filter = createParseQueryFn<ProductDocument>({
   ],
 });
 
-// TODO: Unify parser functions
 const sortFieldConfigs: ISortFieldConfigs<ProductDocument> = {
   [ProductSortKey.ID]: {
     field: "_id",
@@ -42,47 +43,32 @@ const sortFieldConfigs: ISortFieldConfigs<ProductDocument> = {
 };
 
 export default class ProductsAPI extends MongoDataSource<ProductDocument> {
-  public async getById(
-    id: ObjectId
-  ): Promise<ProductDocument | null | undefined> {
+  public async getById({
+    id,
+  }: QueryProductArgs): Promise<ProductDocument | null | undefined> {
     return this.findOneById(id);
   }
 
   public async getByConnection({
-    first,
-    after,
-    last,
-    before,
-    query,
+    query: rawQuery,
     sortKey = ProductSortKey.ID,
     reverse = false,
+    ...paginationArgs
   }: QueryProductsArgs): Promise<SourceProductConnection> {
-    const collection: Collection<ProductDocument> = this.collection;
-
-    // TODO These can be moved to a better place too...
-    if (!first && !last) {
-      throw new Error("TODO: Errormessage -> !first && !last");
-    } else if (first && before) {
-      throw new Error("TODO: Errormessage -> first && before");
-    } else if (last && after) {
-      throw new Error("TODO: Errormessage -> last && after");
-    }
+    validatePaginationArgs({ ...paginationArgs });
 
     // TODO: Unify parser functions
-    const fitlerQuery = filter(query);
+    const query = createFilterQuery(rawQuery);
 
     const connectionResponse = await createPaginatedMongoDBDataFn<
       ProductDocument,
       ProductSortKey
     >(
-      collection,
+      this.collection,
       sortFieldConfigs
     )({
-      first,
-      after,
-      last,
-      before,
-      query: fitlerQuery,
+      ...paginationArgs,
+      query,
       sortKey,
       reverse,
     });

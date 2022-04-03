@@ -1,4 +1,5 @@
 import {
+  QueryUserArgs,
   QueryUsersArgs,
   UserCreateInput,
   UserSortKey,
@@ -16,9 +17,10 @@ import { createParseQueryFn } from "../../../tools/query";
 import {
   createPaginatedMongoDBDataFn,
   ISortFieldConfigs,
+  validatePaginationArgs,
 } from "../../../tools/pagination";
 
-const filter = createParseQueryFn<UserDocument>({
+const createFilterQuery = createParseQueryFn<UserDocument>({
   // When there is no field specified in the query, but only a search term is provided
   searchTermFields: ["username", "email"],
   searchFields: [
@@ -28,7 +30,6 @@ const filter = createParseQueryFn<UserDocument>({
   ],
 });
 
-// TODO: Unify parser functions
 const sortFieldConfigs: ISortFieldConfigs<UserDocument> = {
   [UserSortKey.ID]: {
     field: "_id",
@@ -49,45 +50,33 @@ const sortFieldConfigs: ISortFieldConfigs<UserDocument> = {
 };
 
 export default class UsersAPI extends MongoDataSource<UserDocument> {
-  public async getById(id: ObjectId): Promise<UserDocument | null | undefined> {
+  public async getById({
+    id,
+  }: QueryUserArgs): Promise<UserDocument | null | undefined> {
     return this.findOneById(id);
   }
 
   public async getByConnection({
-    first,
-    after,
-    last,
-    before,
-    query,
+    query: rawQuery,
     sortKey = UserSortKey.ID,
     reverse = false,
+    ...paginationArgs
   }: QueryUsersArgs): Promise<SourceUserConnection> {
-    const collection: Collection<UserDocument> = this.collection;
-
-    // TODO These can be moved to a better place too...
-    if (!first && !last) {
-      throw new Error("TODO: Errormessage -> !first && !last");
-    } else if (first && before) {
-      throw new Error("TODO: Errormessage -> first && before");
-    } else if (last && after) {
-      throw new Error("TODO: Errormessage -> last && after");
-    }
+    // Validation
+    validatePaginationArgs({ ...paginationArgs });
 
     // TODO: Unify parser functions
-    const fitlerQuery = filter(query);
+    const query = createFilterQuery(rawQuery);
 
     const connectionResponse = await createPaginatedMongoDBDataFn<
       UserDocument,
       UserSortKey
     >(
-      collection,
+      this.collection,
       sortFieldConfigs
     )({
-      first,
-      after,
-      last,
-      before,
-      query: fitlerQuery,
+      ...paginationArgs,
+      query,
       sortKey,
       reverse,
     });
@@ -110,7 +99,6 @@ export default class UsersAPI extends MongoDataSource<UserDocument> {
         ],
       };
     }
-
     const doc = { ...input };
     const result = await collection.insertOne(doc);
 

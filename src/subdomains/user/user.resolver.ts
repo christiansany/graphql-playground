@@ -5,10 +5,10 @@ import {
   UserUpdateInput,
 } from "@generation/generated";
 import { GraphQLCustomResolversContext } from "src/server/types";
-import { ObjectId } from "mongodb";
 import { UserDocument } from "./data-sources/users.types";
 import { dataSourcesHelpers } from "src/tools/data-sources-helper";
 
+// TODO Fix loose types (return types of the getById etc functions are not clear)
 const dataSourcesHelper = dataSourcesHelpers<QueryUserArgs, QueryUsersArgs>(
   "users"
 );
@@ -21,7 +21,7 @@ export default {
       { dataSources: { users } }: GraphQLCustomResolversContext
     ) => {
       // TODO Pretending to read user id from context
-      return users.getById(new ObjectId("6190f2fb58ae481e2c235fd8"));
+      return users.getById({ id: "6190f2fb58ae481e2c235fd8" });
     },
     user: dataSourcesHelper.getById,
     users: dataSourcesHelper.getByConnection,

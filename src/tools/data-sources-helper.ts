@@ -3,7 +3,6 @@ import {
   QueryUsersArgs,
   Scalars,
 } from "@generation/generated";
-import { ObjectId } from "mongodb";
 import {
   GraphQLCustomDataSources,
   GraphQLCustomResolversContext,
@@ -13,7 +12,7 @@ interface IdQueryArgs {
   id: Scalars["ID"];
 }
 
-// TODO: Fix the extends here
+// TODO: Fix types here, this is ugly and typing is loose
 export const dataSourcesHelpers = <
   ByIdArgs extends IdQueryArgs,
   ByConnectionArgs = QueryUsersArgs | QueryProductsArgs
@@ -22,12 +21,12 @@ export const dataSourcesHelpers = <
 ) => ({
   getById: (
     _: never,
-    { id }: ByIdArgs,
+    args: ByIdArgs,
     { dataSources: { [dataSource]: source } }: GraphQLCustomResolversContext
-  ) => source.getById(new ObjectId(id)),
+  ) => source.getById(args),
   getByConnection: (
     _: never,
-    connection: ByConnectionArgs,
+    args: ByConnectionArgs,
     { dataSources: { [dataSource]: source } }: GraphQLCustomResolversContext
-  ) => source.getByConnection(connection),
+  ) => source.getByConnection(args),
 });
