@@ -8,8 +8,8 @@ import { GraphQLCustomResolversContext } from "src/server/types";
 import { dataSourcesHelpers } from "src/tools/data-sources-helper";
 import { ProductDocument } from "./data-sources/product.types";
 
-// TODO Fix loose types (return types of the getById etc functions are not clear)
 const dataSourcesHelper = dataSourcesHelpers<
+  "products",
   QueryProductArgs,
   QueryProductsArgs
 >("products");

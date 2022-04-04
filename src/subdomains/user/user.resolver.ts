@@ -8,10 +8,11 @@ import { GraphQLCustomResolversContext } from "src/server/types";
 import { UserDocument } from "./data-sources/users.types";
 import { dataSourcesHelpers } from "src/tools/data-sources-helper";
 
-// TODO Fix loose types (return types of the getById etc functions are not clear)
-const dataSourcesHelper = dataSourcesHelpers<QueryUserArgs, QueryUsersArgs>(
-  "users"
-);
+const dataSourcesHelper = dataSourcesHelpers<
+  "users",
+  QueryUserArgs,
+  QueryUsersArgs
+>("users");
 
 export default {
   Query: {

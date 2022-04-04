@@ -12,21 +12,24 @@ interface IdQueryArgs {
   id: Scalars["ID"];
 }
 
-// TODO: Fix types here, this is ugly and typing is loose
 export const dataSourcesHelpers = <
+  T extends keyof GraphQLCustomDataSources,
   ByIdArgs extends IdQueryArgs,
   ByConnectionArgs = QueryUsersArgs | QueryProductsArgs
 >(
   dataSource: keyof GraphQLCustomDataSources
 ) => ({
-  getById: (
+  getById: ((
     _: never,
     args: ByIdArgs,
     { dataSources: { [dataSource]: source } }: GraphQLCustomResolversContext
-  ) => source.getById(args),
-  getByConnection: (
+  ) => source.getById(args)) as GraphQLCustomDataSources[T]["getById"],
+  getByConnection: ((
     _: never,
     args: ByConnectionArgs,
     { dataSources: { [dataSource]: source } }: GraphQLCustomResolversContext
-  ) => source.getByConnection(args),
+  ) =>
+    source.getByConnection(
+      args
+    )) as GraphQLCustomDataSources[T]["getByConnection"],
 });
