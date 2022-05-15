@@ -5,7 +5,7 @@ import {
   PageInfo,
   ProductRating,
   Scalars,
-} from "@generation/generated";
+} from "__generated__/schema.generated";
 import DataLoader from "dataloader";
 import { createSmartCollection } from "../utils";
 

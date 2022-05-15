@@ -3,7 +3,7 @@ import {
   Maybe,
   UserCreatePayload,
   UserUpdatePayload,
-} from "@generation/generated";
+} from "__generated__/schema.generated";
 import { SourceConnection } from "../../generic/types";
 
 export interface UserDocument {

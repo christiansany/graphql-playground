@@ -1,12 +1,13 @@
 // Generated File. Do not change it manually!
 // tslint:disable:no-any
+
 import {
   GraphQLResolveInfo,
   GraphQLScalarType,
   GraphQLScalarTypeConfig,
 } from "graphql";
 import { UserDocument } from "src/subdomains/user/data-sources/users.types";
-import { ProductDocument } from "src/subdomains/product/data-sources/products.types";
+import { ProductDocument } from "src/subdomains/product/data-sources/product.types";
 import { GraphQLCustomResolversContext } from "src/server/types";
 export type Maybe<T> = T | null;
 export type Exact<T extends { [key: string]: unknown }> = {

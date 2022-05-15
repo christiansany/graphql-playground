@@ -1,11 +1,11 @@
-schema: ["src/**/*.graphql"]
+schema: "src/**/*.graphql"
 generates:
-  src/lib/@generation/generated.ts:
+  __generated__/schema.generated.ts:
     plugins:
       - add:
-          content: // Generated File. Do not change it manually!
-      - add:
-          content: // tslint:disable:no-any
+          content: |
+            // Generated File. Do not change it manually!
+            // tslint:disable:no-any
       - typescript
       - typescript-resolvers
     config:
@@ -18,7 +18,7 @@ generates:
         Void: "void"
       mappers:
         User: src/subdomains/user/data-sources/users.types#UserDocument
-        Product: src/subdomains/product/data-sources/products.types#ProductDocument
+        Product: src/subdomains/product/data-sources/product.types#ProductDocument
 hooks:
   afterOneFileWrite:
     - tslint --fix

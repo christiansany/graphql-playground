@@ -14,7 +14,7 @@
     "lint": "cross-env tslint -c tslint.json 'src/**/*.ts'",
     "prettier": "prettier --check **/*.{graphql,js,json,json5,md,ts,yaml,yml}",
     "prettier:write": "prettier --write **/*.{graphql,js,json,json5,md,ts,yaml,yml}",
-    "generateTypes": "gql-gen --config src/lib/@generation/codegen.yml",
+    "generateTypes": "gql-gen --config ./.graphqlrc.yml",
     "test": "jest"
   },
   "dependencies": {

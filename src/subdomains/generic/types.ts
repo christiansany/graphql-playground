@@ -1,4 +1,4 @@
-import { PageInfo, Scalars } from "@generation/generated";
+import { PageInfo, Scalars } from "__generated__/schema.generated";
 
 export interface SourceEdge<T> {
   cursor: Scalars["String"];

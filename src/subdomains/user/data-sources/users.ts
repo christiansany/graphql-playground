@@ -4,7 +4,7 @@ import {
   UserCreateInput,
   UserSortKey,
   UserUpdateInput,
-} from "@generation/generated";
+} from "__generated__/schema.generated";
 import { MongoDataSource } from "apollo-datasource-mongodb";
 import { ObjectId, Collection } from "mongodb";
 import {

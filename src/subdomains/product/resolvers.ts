@@ -1,5 +1,5 @@
-import { Resolvers } from "@generation/generated";
 import { generateGID, parseGID } from "src/tools/gid";
+import { Resolvers } from "__generated__/schema.generated";
 
 const resolvers: Resolvers = {
   Query: {

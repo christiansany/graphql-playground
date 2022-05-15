@@ -3,7 +3,7 @@ import {
   QueryProductRatingCommentArgs,
   QueryProductRatingCommentsArgs,
   UserProductRatingCommentsArgs,
-} from "@generation/generated";
+} from "__generated__/schema.generated";
 import { GraphQLCustomResolversContext } from "src/server/types";
 
 export default {

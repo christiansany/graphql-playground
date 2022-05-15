@@ -4,7 +4,7 @@ import {
   ProductUpdateInput,
   QueryProductArgs,
   QueryProductsArgs,
-} from "@generation/generated";
+} from "__generated__/schema.generated";
 import { MongoDataSource } from "apollo-datasource-mongodb";
 import { ObjectId, Collection } from "mongodb";
 import {
@@ -43,10 +43,11 @@ const sortFieldConfigs: ISortFieldConfigs<ProductDocument> = {
 };
 
 export default class ProductsAPI extends MongoDataSource<ProductDocument> {
+  // TODO: switch to primitive id as string
   public async getById({
     id,
-  }: QueryProductArgs): Promise<ProductDocument | null | undefined> {
-    return this.findOneById(id);
+  }: QueryProductArgs): Promise<ProductDocument | null> {
+    return (await this.findOneById(id)) || null;
   }
 
   public async getByConnection({

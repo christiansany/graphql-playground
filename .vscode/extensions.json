@@ -2,7 +2,7 @@
   "recommendations": [
     "editorconfig.editorconfig",
     "esbenp.prettier-vscode",
-    "kumar-harsh.graphql-for-vscode",
+    "GraphQL.vscode-graphql",
     "ms-vscode.vscode-typescript-tslint-plugin"
   ]
 }

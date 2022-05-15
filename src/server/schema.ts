@@ -6,11 +6,8 @@ const typesSubdomains = loadFilesSync(
   path.join(__dirname, "../subdomains/**/*.graphql"),
   { recursive: true }
 );
-const typesLib = loadFilesSync(path.join(__dirname, "../lib/**/*.graphql"), {
-  recursive: true,
-});
 
-export const typeDefs = mergeTypeDefs(typesSubdomains.concat(typesLib));
+export const typeDefs = mergeTypeDefs(typesSubdomains);
 export const resolvers = loadFilesSync(
   [
     path.join(__dirname, "../subdomains/**/resolver.*"),

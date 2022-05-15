@@ -1,5 +1,7 @@
-import { Resolvers } from "@generation/generated";
 import { parseGID } from "src/tools/gid";
+import { Resolvers } from "__generated__/schema.generated";
+import { ProductDocument } from "../product/data-sources/product.types";
+import { UserDocument } from "../user/data-sources/users.types";
 
 // TODO: All Node types need a dataloader and this should be enforced
 const resolvers: Resolvers = {
@@ -19,10 +21,12 @@ const resolvers: Resolvers = {
   Node: {
     __resolveType: (source) => {
       // TODO When the gid is already put on the Model inside datasource we can use it to resolve the type without any issues
-
-      if (source.username) {
+      if ((source as UserDocument).username) {
         return "User";
-      } else if (source.name && source.description) {
+      } else if (
+        (source as ProductDocument).name &&
+        (source as ProductDocument).description
+      ) {
         return "Product";
       }
       throw new Error("Interface could not be resolved in __resolveType"); // TODO: Add specific apollo error

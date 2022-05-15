@@ -21,9 +21,6 @@ module.exports = function babelConfig(api = null) {
         {
           root: ["."],
           cwd: "babelrc",
-          alias: {
-            "@generation": "./src/lib/@generation",
-          },
           extensions: [".js", ".jsx", ".ts", ".tsx"],
         },
       ],

@@ -1,4 +1,4 @@
-import { Maybe } from "@generation/generated";
+import { Maybe } from "__generated__/schema.generated";
 import btoa from "btoa";
 import atob from "atob";
 import {
