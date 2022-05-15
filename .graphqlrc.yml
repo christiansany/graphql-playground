@@ -17,7 +17,7 @@ generates:
       scalars:
         Void: "void"
       mappers:
-        User: src/subdomains/user/data-sources/users.types#UserDocument
+        User: src/subdomains/user/data-sources/user.types#UserDocument
         Product: src/subdomains/product/data-sources/product.types#ProductDocument
 hooks:
   afterOneFileWrite:

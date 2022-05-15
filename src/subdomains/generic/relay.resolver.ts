@@ -1,7 +1,7 @@
 import { parseGID } from "src/tools/gid";
 import { Resolvers } from "__generated__/schema.generated";
 import { ProductDocument } from "../product/data-sources/product.types";
-import { UserDocument } from "../user/data-sources/users.types";
+import { UserDocument } from "../user/data-sources/user.types";
 
 // TODO: All Node types need a dataloader and this should be enforced
 const resolvers: Resolvers = {

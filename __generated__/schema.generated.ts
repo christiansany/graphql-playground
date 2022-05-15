@@ -6,7 +6,7 @@ import {
   GraphQLScalarType,
   GraphQLScalarTypeConfig,
 } from "graphql";
-import { UserDocument } from "src/subdomains/user/data-sources/users.types";
+import { UserDocument } from "src/subdomains/user/data-sources/user.types";
 import { ProductDocument } from "src/subdomains/product/data-sources/product.types";
 import { GraphQLCustomResolversContext } from "src/server/types";
 export type Maybe<T> = T | null;

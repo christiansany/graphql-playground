@@ -3,7 +3,7 @@ import { resolvers, typeDefs } from "./schema";
 import { ApolloServer } from "apollo-server";
 import { MongoClient } from "mongodb";
 
-import UsersAPI from "../subdomains/user/data-sources/users";
+import UsersAPI from "../subdomains/user/data-sources/user";
 import ProductsAPI from "../subdomains/product/data-sources/product";
 
 const uri = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@cluster0.xr1op.mongodb.net/${process.env.MONGO_DB}?retryWrites=true&w=majority`;

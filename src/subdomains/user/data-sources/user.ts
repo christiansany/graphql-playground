@@ -12,7 +12,7 @@ import {
   SourceUserConnection,
   SourceUserCreatePayload,
   SourceUserUpdatePayload,
-} from "./users.types";
+} from "./user.types";
 import { createParseQueryFn } from "../../../tools/query";
 import {
   createPaginatedMongoDBDataFn,

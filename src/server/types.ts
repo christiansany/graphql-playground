@@ -1,4 +1,4 @@
-import UsersAPI from "../subdomains/user/data-sources/users";
+import UsersAPI from "../subdomains/user/data-sources/user";
 import DataLoaders from "../subdomains/dataLoaders";
 import ProductsAPI from "../subdomains/product/data-sources/product";
 
