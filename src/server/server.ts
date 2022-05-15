@@ -12,12 +12,12 @@ client.connect().then(async () => {
   // tslint:disable-next-line
   console.log(`🌿  Connected to Mongo Cluster`);
 
-  // This should be moved to the the user data sources
+  // This should be moved to the contructor of the datasource
   client.db().collection("users").createIndex({ _id: 1, height: 1 });
   client.db().collection("users").createIndex({ _id: 1, username: 1 });
   client.db().collection("users").createIndex({ email: 1 }, { unique: true });
 
-  // This should be moved to the products data sources
+  // This should be moved to the contructor of the datasource
   client.db().collection("products").createIndex({ _id: 1, price: 1 });
   client.db().collection("products").createIndex({ _id: 1, name: 1 });
 
@@ -28,8 +28,8 @@ client.connect().then(async () => {
       return { dataLoaders: new DataLoaders() };
     },
     dataSources: () => ({
-      users: new UsersAPI(client.db().collection("users")),
-      products: new ProductsAPI(client.db().collection("products")),
+      User: new UsersAPI(client.db().collection("users")),
+      Product: new ProductsAPI(client.db().collection("products")),
     }),
   });
 

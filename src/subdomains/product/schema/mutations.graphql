@@ -1,0 +1,27 @@
+type Mutation {
+  productCreate(input: ProductCreateInput!): ProductCreatePayload
+  productUpdate(input: ProductUpdateInput!): ProductUpdatePayload
+}
+
+input ProductCreateInput {
+  name: String!
+  description: String!
+  price: Int!
+}
+
+type ProductCreatePayload {
+  userErrors: [UserError!]!
+  product: Product
+}
+
+input ProductUpdateInput {
+  id: ID!
+  name: String
+  description: String
+  price: Int
+}
+
+type ProductUpdatePayload {
+  userErrors: [UserError!]!
+  product: Product
+}

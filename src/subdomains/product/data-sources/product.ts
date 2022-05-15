@@ -9,8 +9,8 @@ import { MongoDataSource } from "apollo-datasource-mongodb";
 import { ObjectId, Collection } from "mongodb";
 import {
   ProductDocument,
-  SourceProductCreateResponse,
-  SourceProductUpdateResponse,
+  SourceProductCreatePayload,
+  SourceProductUpdatePayload,
   SourceProductConnection,
 } from "./product.types";
 import { createParseQueryFn } from "../../../tools/query";
@@ -78,7 +78,7 @@ export default class ProductsAPI extends MongoDataSource<ProductDocument> {
 
   public async createProduct(
     input: ProductCreateInput
-  ): Promise<SourceProductCreateResponse> {
+  ): Promise<SourceProductCreatePayload> {
     const collection: Collection<ProductDocument> = this.collection;
 
     const doc = { ...input };
@@ -95,7 +95,7 @@ export default class ProductsAPI extends MongoDataSource<ProductDocument> {
 
   public async updateProduct(
     input: ProductUpdateInput
-  ): Promise<SourceProductUpdateResponse> {
+  ): Promise<SourceProductUpdatePayload> {
     const collection: Collection<ProductDocument> = this.collection;
     const { id, ...rest } = input;
     const product = await collection.findOne({ _id: new ObjectId(id) });

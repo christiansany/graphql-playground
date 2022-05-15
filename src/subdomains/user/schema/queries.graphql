@@ -1,0 +1,20 @@
+type Query {
+  me: User
+  user(id: ID!): User
+  users(
+    first: Int
+    last: Int
+    before: String
+    after: String
+    query: String
+    sortKey: UserSortKey! = ID
+    reverse: Boolean! = false
+  ): UserConnection!
+}
+
+enum UserSortKey {
+  ID
+  USERNAME
+  EMAIL
+  HEIGHT
+}

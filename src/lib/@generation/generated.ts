@@ -5,11 +5,14 @@ import {
   GraphQLScalarType,
   GraphQLScalarTypeConfig,
 } from "graphql";
+import { UserDocument } from "src/subdomains/user/data-sources/users.types";
+import { ProductDocument } from "src/subdomains/product/data-sources/products.types";
 import { GraphQLCustomResolversContext } from "src/server/types";
 export type Maybe<T> = T | null;
 export type Exact<T extends { [key: string]: unknown }> = {
   [K in keyof T]: T[K];
 };
+export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 export type RequireFields<T, K extends keyof T> = {
   [X in Exclude<keyof T, K>]?: T[X];
 } &
@@ -26,8 +29,14 @@ export type Scalars = {
   HTML: any;
 };
 
+/**
+ * Returns a Connection, in accordance with
+ * [Relay specification](https://relay.dev/graphql/connections.htm#sec-Connection-Types).
+ */
 export type Connection = {
+  /** A list of edges. */
   edges: Edge[];
+  /** Information to aid in pagination. */
   pageInfo: PageInfo;
 };
 
@@ -40,42 +49,58 @@ export type DisplayableError = {
   message: Scalars["String"];
 };
 
+/** A generic interface which holds one Edge and a cursor during pagination. */
 export type Edge = {
+  /** A cursor for use in pagination. */
   cursor: Scalars["String"];
+  /** The item implementing the node interface. */
   node: Node;
 };
 
 export type Mutation = {
-  productCreate?: Maybe<ProductCreateResponse>;
-  productUpdate?: Maybe<ProductUpdateResponse>;
-  userCreate?: Maybe<UserCreateResponse>;
-  userUpdate?: Maybe<UserUpdateResponse>;
+  productCreate?: Maybe<ProductCreatePayload>;
+  productUpdate?: Maybe<ProductUpdatePayload>;
+  userCreate?: Maybe<UserCreatePayload>;
+  userUpdate?: Maybe<UserUpdatePayload>;
 };
 
 export type MutationProductCreateArgs = {
-  input?: Maybe<ProductCreateInput>;
+  input: ProductCreateInput;
 };
 
 export type MutationProductUpdateArgs = {
-  input?: Maybe<ProductUpdateInput>;
+  input: ProductUpdateInput;
 };
 
 export type MutationUserCreateArgs = {
-  input?: Maybe<UserCreateInput>;
+  input: UserCreateInput;
 };
 
 export type MutationUserUpdateArgs = {
-  input?: Maybe<UserUpdateInput>;
+  input: UserUpdateInput;
 };
 
+/**
+ * An object with an ID field to support global identification, in accordance with the [Relay
+ * specification](https://relay.dev/graphql/objectidentification.htm#sec-Node-Interface).
+ */
 export type Node = {
+  /** A globally-unique identifier. */
   id: Scalars["ID"];
 };
 
+/**
+ * Returns information about pagination in a connection, in accordance with the
+ * [Relay specification](https://relay.dev/graphql/connections.htm#sec-undefined.PageInfo).
+ */
 export type PageInfo = {
+  /** The cursor corresponding to the last node in edges. */
   endCursor?: Maybe<Scalars["String"]>;
+  /** Whether there are more pages to fetch following the current page. */
   hasNextPage: Scalars["Boolean"];
+  /** Whether there are any pages prior to the current page. */
   hasPreviousPage: Scalars["Boolean"];
+  /** The cursor corresponding to the first node in edges. */
   startCursor?: Maybe<Scalars["String"]>;
 };
 
@@ -83,7 +108,7 @@ export type Product = Node & {
   description: Scalars["String"];
   id: Scalars["ID"];
   name: Scalars["String"];
-  price: Scalars["Int"];
+  price: Scalars["Float"];
   productRatings: ProductRatingConnection;
   productRatingsSummary: ProductRatingsSummary;
 };
@@ -106,7 +131,7 @@ export type ProductCreateInput = {
   price: Scalars["Int"];
 };
 
-export type ProductCreateResponse = {
+export type ProductCreatePayload = {
   product?: Maybe<Product>;
   userErrors: UserError[];
 };
@@ -196,13 +221,15 @@ export type ProductUpdateInput = {
   price?: Maybe<Scalars["Int"]>;
 };
 
-export type ProductUpdateResponse = {
+export type ProductUpdatePayload = {
   product?: Maybe<Product>;
   userErrors: UserError[];
 };
 
 export type Query = {
   me?: Maybe<User>;
+  node?: Maybe<Node>;
+  nodes: Node[];
   product?: Maybe<Product>;
   productRating?: Maybe<ProductRating>;
   productRatingComment?: Maybe<ProductRatingComment>;
@@ -211,6 +238,14 @@ export type Query = {
   products: ProductConnection;
   user?: Maybe<User>;
   users: UserConnection;
+};
+
+export type QueryNodeArgs = {
+  id: Scalars["ID"];
+};
+
+export type QueryNodesArgs = {
+  ids: Array<Scalars["ID"]>;
 };
 
 export type QueryProductArgs = {
@@ -303,7 +338,7 @@ export type UserCreateInput = {
   username: Scalars["String"];
 };
 
-export type UserCreateResponse = {
+export type UserCreatePayload = {
   user?: Maybe<User>;
   userErrors: UserError[];
 };
@@ -332,7 +367,7 @@ export type UserUpdateInput = {
   username?: Maybe<Scalars["String"]>;
 };
 
-export type UserUpdateResponse = {
+export type UserUpdatePayload = {
   user?: Maybe<User>;
   userErrors: UserError[];
 };
@@ -508,40 +543,96 @@ export type ResolversTypes = {
     | ResolversTypes["ProductRatingComment"]
     | ResolversTypes["User"];
   PageInfo: ResolverTypeWrapper<PageInfo>;
-  Product: ResolverTypeWrapper<Product>;
-  ProductConnection: ResolverTypeWrapper<ProductConnection>;
+  Product: ResolverTypeWrapper<ProductDocument>;
+  ProductConnection: ResolverTypeWrapper<
+    Omit<ProductConnection, "edges"> & {
+      edges: Array<ResolversTypes["ProductEdge"]>;
+    }
+  >;
   ProductCreateInput: ProductCreateInput;
-  ProductCreateResponse: ResolverTypeWrapper<ProductCreateResponse>;
-  ProductEdge: ResolverTypeWrapper<ProductEdge>;
-  ProductRating: ResolverTypeWrapper<ProductRating>;
-  ProductRatingComment: ResolverTypeWrapper<ProductRatingComment>;
-  ProductRatingCommentConnection: ResolverTypeWrapper<ProductRatingCommentConnection>;
-  ProductRatingCommentEdge: ResolverTypeWrapper<ProductRatingCommentEdge>;
-  ProductRatingConnection: ResolverTypeWrapper<ProductRatingConnection>;
-  ProductRatingEdge: ResolverTypeWrapper<ProductRatingEdge>;
+  ProductCreatePayload: ResolverTypeWrapper<
+    Omit<ProductCreatePayload, "product"> & {
+      product?: Maybe<ResolversTypes["Product"]>;
+    }
+  >;
+  ProductEdge: ResolverTypeWrapper<
+    Omit<ProductEdge, "node"> & { node: ResolversTypes["Product"] }
+  >;
+  ProductRating: ResolverTypeWrapper<
+    Omit<
+      ProductRating,
+      "comments" | "creator" | "product" | "userVote" | "votes"
+    > & {
+      comments: ResolversTypes["ProductRatingCommentConnection"];
+      creator: ResolversTypes["User"];
+      product: ResolversTypes["Product"];
+      userVote?: Maybe<ResolversTypes["Vote"]>;
+      votes: Array<ResolversTypes["Vote"]>;
+    }
+  >;
+  ProductRatingComment: ResolverTypeWrapper<
+    Omit<ProductRatingComment, "creator" | "rating" | "userVote" | "votes"> & {
+      creator: ResolversTypes["User"];
+      rating: ResolversTypes["ProductRating"];
+      userVote?: Maybe<ResolversTypes["Vote"]>;
+      votes: Array<ResolversTypes["Vote"]>;
+    }
+  >;
+  ProductRatingCommentConnection: ResolverTypeWrapper<
+    Omit<ProductRatingCommentConnection, "edges"> & {
+      edges: Array<ResolversTypes["ProductRatingCommentEdge"]>;
+    }
+  >;
+  ProductRatingCommentEdge: ResolverTypeWrapper<
+    Omit<ProductRatingCommentEdge, "node"> & {
+      node: ResolversTypes["ProductRatingComment"];
+    }
+  >;
+  ProductRatingConnection: ResolverTypeWrapper<
+    Omit<ProductRatingConnection, "edges"> & {
+      edges: Array<ResolversTypes["ProductRatingEdge"]>;
+    }
+  >;
+  ProductRatingEdge: ResolverTypeWrapper<
+    Omit<ProductRatingEdge, "node"> & { node: ResolversTypes["ProductRating"] }
+  >;
   ProductRatingsSummary: ResolverTypeWrapper<ProductRatingsSummary>;
   ProductSortKey: ProductSortKey;
   ProductUpdateInput: ProductUpdateInput;
-  ProductUpdateResponse: ResolverTypeWrapper<ProductUpdateResponse>;
+  ProductUpdatePayload: ResolverTypeWrapper<
+    Omit<ProductUpdatePayload, "product"> & {
+      product?: Maybe<ResolversTypes["Product"]>;
+    }
+  >;
   Query: ResolverTypeWrapper<{}>;
   String: ResolverTypeWrapper<Scalars["String"]>;
   Timestamps:
     | ResolversTypes["ProductRating"]
     | ResolversTypes["ProductRatingComment"]
     | ResolversTypes["Vote"];
-  User: ResolverTypeWrapper<User>;
-  UserConnection: ResolverTypeWrapper<UserConnection>;
+  User: ResolverTypeWrapper<UserDocument>;
+  UserConnection: ResolverTypeWrapper<
+    Omit<UserConnection, "edges"> & { edges: Array<ResolversTypes["UserEdge"]> }
+  >;
   UserCreateInput: UserCreateInput;
-  UserCreateResponse: ResolverTypeWrapper<UserCreateResponse>;
-  UserEdge: ResolverTypeWrapper<UserEdge>;
+  UserCreatePayload: ResolverTypeWrapper<
+    Omit<UserCreatePayload, "user"> & { user?: Maybe<ResolversTypes["User"]> }
+  >;
+  UserEdge: ResolverTypeWrapper<
+    Omit<UserEdge, "node"> & { node: ResolversTypes["User"] }
+  >;
   UserError: ResolverTypeWrapper<UserError>;
   UserSortKey: UserSortKey;
   UserUpdateInput: UserUpdateInput;
-  UserUpdateResponse: ResolverTypeWrapper<UserUpdateResponse>;
+  UserUpdatePayload: ResolverTypeWrapper<
+    Omit<UserUpdatePayload, "user"> & { user?: Maybe<ResolversTypes["User"]> }
+  >;
   Votable:
     | ResolversTypes["ProductRating"]
     | ResolversTypes["ProductRatingComment"];
-  Vote: ResolverTypeWrapper<Vote>;
+  Vote: ResolverTypeWrapper<
+    Omit<Vote, "user"> & { user: ResolversTypes["User"] }
+  >;
   VotesSummary: ResolverTypeWrapper<VotesSummary>;
   VoteType: VoteType;
 };
@@ -576,38 +667,78 @@ export type ResolversParentTypes = {
     | ResolversParentTypes["ProductRatingComment"]
     | ResolversParentTypes["User"];
   PageInfo: PageInfo;
-  Product: Product;
-  ProductConnection: ProductConnection;
+  Product: ProductDocument;
+  ProductConnection: Omit<ProductConnection, "edges"> & {
+    edges: Array<ResolversParentTypes["ProductEdge"]>;
+  };
   ProductCreateInput: ProductCreateInput;
-  ProductCreateResponse: ProductCreateResponse;
-  ProductEdge: ProductEdge;
-  ProductRating: ProductRating;
-  ProductRatingComment: ProductRatingComment;
-  ProductRatingCommentConnection: ProductRatingCommentConnection;
-  ProductRatingCommentEdge: ProductRatingCommentEdge;
-  ProductRatingConnection: ProductRatingConnection;
-  ProductRatingEdge: ProductRatingEdge;
+  ProductCreatePayload: Omit<ProductCreatePayload, "product"> & {
+    product?: Maybe<ResolversParentTypes["Product"]>;
+  };
+  ProductEdge: Omit<ProductEdge, "node"> & {
+    node: ResolversParentTypes["Product"];
+  };
+  ProductRating: Omit<
+    ProductRating,
+    "comments" | "creator" | "product" | "userVote" | "votes"
+  > & {
+    comments: ResolversParentTypes["ProductRatingCommentConnection"];
+    creator: ResolversParentTypes["User"];
+    product: ResolversParentTypes["Product"];
+    userVote?: Maybe<ResolversParentTypes["Vote"]>;
+    votes: Array<ResolversParentTypes["Vote"]>;
+  };
+  ProductRatingComment: Omit<
+    ProductRatingComment,
+    "creator" | "rating" | "userVote" | "votes"
+  > & {
+    creator: ResolversParentTypes["User"];
+    rating: ResolversParentTypes["ProductRating"];
+    userVote?: Maybe<ResolversParentTypes["Vote"]>;
+    votes: Array<ResolversParentTypes["Vote"]>;
+  };
+  ProductRatingCommentConnection: Omit<
+    ProductRatingCommentConnection,
+    "edges"
+  > & { edges: Array<ResolversParentTypes["ProductRatingCommentEdge"]> };
+  ProductRatingCommentEdge: Omit<ProductRatingCommentEdge, "node"> & {
+    node: ResolversParentTypes["ProductRatingComment"];
+  };
+  ProductRatingConnection: Omit<ProductRatingConnection, "edges"> & {
+    edges: Array<ResolversParentTypes["ProductRatingEdge"]>;
+  };
+  ProductRatingEdge: Omit<ProductRatingEdge, "node"> & {
+    node: ResolversParentTypes["ProductRating"];
+  };
   ProductRatingsSummary: ProductRatingsSummary;
   ProductUpdateInput: ProductUpdateInput;
-  ProductUpdateResponse: ProductUpdateResponse;
+  ProductUpdatePayload: Omit<ProductUpdatePayload, "product"> & {
+    product?: Maybe<ResolversParentTypes["Product"]>;
+  };
   Query: {};
   String: Scalars["String"];
   Timestamps:
     | ResolversParentTypes["ProductRating"]
     | ResolversParentTypes["ProductRatingComment"]
     | ResolversParentTypes["Vote"];
-  User: User;
-  UserConnection: UserConnection;
+  User: UserDocument;
+  UserConnection: Omit<UserConnection, "edges"> & {
+    edges: Array<ResolversParentTypes["UserEdge"]>;
+  };
   UserCreateInput: UserCreateInput;
-  UserCreateResponse: UserCreateResponse;
-  UserEdge: UserEdge;
+  UserCreatePayload: Omit<UserCreatePayload, "user"> & {
+    user?: Maybe<ResolversParentTypes["User"]>;
+  };
+  UserEdge: Omit<UserEdge, "node"> & { node: ResolversParentTypes["User"] };
   UserError: UserError;
   UserUpdateInput: UserUpdateInput;
-  UserUpdateResponse: UserUpdateResponse;
+  UserUpdatePayload: Omit<UserUpdatePayload, "user"> & {
+    user?: Maybe<ResolversParentTypes["User"]>;
+  };
   Votable:
     | ResolversParentTypes["ProductRating"]
     | ResolversParentTypes["ProductRatingComment"];
-  Vote: Vote;
+  Vote: Omit<Vote, "user"> & { user: ResolversParentTypes["User"] };
   VotesSummary: VotesSummary;
 };
 
@@ -688,28 +819,28 @@ export type MutationResolvers<
   ParentType extends ResolversParentTypes["Mutation"] = ResolversParentTypes["Mutation"]
 > = {
   productCreate?: Resolver<
-    Maybe<ResolversTypes["ProductCreateResponse"]>,
+    Maybe<ResolversTypes["ProductCreatePayload"]>,
     ParentType,
     ContextType,
-    RequireFields<MutationProductCreateArgs, never>
+    RequireFields<MutationProductCreateArgs, "input">
   >;
   productUpdate?: Resolver<
-    Maybe<ResolversTypes["ProductUpdateResponse"]>,
+    Maybe<ResolversTypes["ProductUpdatePayload"]>,
     ParentType,
     ContextType,
-    RequireFields<MutationProductUpdateArgs, never>
+    RequireFields<MutationProductUpdateArgs, "input">
   >;
   userCreate?: Resolver<
-    Maybe<ResolversTypes["UserCreateResponse"]>,
+    Maybe<ResolversTypes["UserCreatePayload"]>,
     ParentType,
     ContextType,
-    RequireFields<MutationUserCreateArgs, never>
+    RequireFields<MutationUserCreateArgs, "input">
   >;
   userUpdate?: Resolver<
-    Maybe<ResolversTypes["UserUpdateResponse"]>,
+    Maybe<ResolversTypes["UserUpdatePayload"]>,
     ParentType,
     ContextType,
-    RequireFields<MutationUserUpdateArgs, never>
+    RequireFields<MutationUserUpdateArgs, "input">
   >;
 };
 
@@ -755,7 +886,7 @@ export type ProductResolvers<
   description?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
   id?: Resolver<ResolversTypes["ID"], ParentType, ContextType>;
   name?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
-  price?: Resolver<ResolversTypes["Int"], ParentType, ContextType>;
+  price?: Resolver<ResolversTypes["Float"], ParentType, ContextType>;
   productRatings?: Resolver<
     ResolversTypes["ProductRatingConnection"],
     ParentType,
@@ -783,9 +914,9 @@ export type ProductConnectionResolvers<
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
-export type ProductCreateResponseResolvers<
+export type ProductCreatePayloadResolvers<
   ContextType = GraphQLCustomResolversContext,
-  ParentType extends ResolversParentTypes["ProductCreateResponse"] = ResolversParentTypes["ProductCreateResponse"]
+  ParentType extends ResolversParentTypes["ProductCreatePayload"] = ResolversParentTypes["ProductCreatePayload"]
 > = {
   product?: Resolver<Maybe<ResolversTypes["Product"]>, ParentType, ContextType>;
   userErrors?: Resolver<
@@ -933,9 +1064,9 @@ export type ProductRatingsSummaryResolvers<
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
-export type ProductUpdateResponseResolvers<
+export type ProductUpdatePayloadResolvers<
   ContextType = GraphQLCustomResolversContext,
-  ParentType extends ResolversParentTypes["ProductUpdateResponse"] = ResolversParentTypes["ProductUpdateResponse"]
+  ParentType extends ResolversParentTypes["ProductUpdatePayload"] = ResolversParentTypes["ProductUpdatePayload"]
 > = {
   product?: Resolver<Maybe<ResolversTypes["Product"]>, ParentType, ContextType>;
   userErrors?: Resolver<
@@ -951,6 +1082,18 @@ export type QueryResolvers<
   ParentType extends ResolversParentTypes["Query"] = ResolversParentTypes["Query"]
 > = {
   me?: Resolver<Maybe<ResolversTypes["User"]>, ParentType, ContextType>;
+  node?: Resolver<
+    Maybe<ResolversTypes["Node"]>,
+    ParentType,
+    ContextType,
+    RequireFields<QueryNodeArgs, "id">
+  >;
+  nodes?: Resolver<
+    Array<ResolversTypes["Node"]>,
+    ParentType,
+    ContextType,
+    RequireFields<QueryNodesArgs, "ids">
+  >;
   product?: Resolver<
     Maybe<ResolversTypes["Product"]>,
     ParentType,
@@ -1050,9 +1193,9 @@ export type UserConnectionResolvers<
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
-export type UserCreateResponseResolvers<
+export type UserCreatePayloadResolvers<
   ContextType = GraphQLCustomResolversContext,
-  ParentType extends ResolversParentTypes["UserCreateResponse"] = ResolversParentTypes["UserCreateResponse"]
+  ParentType extends ResolversParentTypes["UserCreatePayload"] = ResolversParentTypes["UserCreatePayload"]
 > = {
   user?: Resolver<Maybe<ResolversTypes["User"]>, ParentType, ContextType>;
   userErrors?: Resolver<
@@ -1085,9 +1228,9 @@ export type UserErrorResolvers<
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
-export type UserUpdateResponseResolvers<
+export type UserUpdatePayloadResolvers<
   ContextType = GraphQLCustomResolversContext,
-  ParentType extends ResolversParentTypes["UserUpdateResponse"] = ResolversParentTypes["UserUpdateResponse"]
+  ParentType extends ResolversParentTypes["UserUpdatePayload"] = ResolversParentTypes["UserUpdatePayload"]
 > = {
   user?: Resolver<Maybe<ResolversTypes["User"]>, ParentType, ContextType>;
   userErrors?: Resolver<
@@ -1156,7 +1299,7 @@ export type Resolvers<ContextType = GraphQLCustomResolversContext> = {
   PageInfo?: PageInfoResolvers<ContextType>;
   Product?: ProductResolvers<ContextType>;
   ProductConnection?: ProductConnectionResolvers<ContextType>;
-  ProductCreateResponse?: ProductCreateResponseResolvers<ContextType>;
+  ProductCreatePayload?: ProductCreatePayloadResolvers<ContextType>;
   ProductEdge?: ProductEdgeResolvers<ContextType>;
   ProductRating?: ProductRatingResolvers<ContextType>;
   ProductRatingComment?: ProductRatingCommentResolvers<ContextType>;
@@ -1165,15 +1308,15 @@ export type Resolvers<ContextType = GraphQLCustomResolversContext> = {
   ProductRatingConnection?: ProductRatingConnectionResolvers<ContextType>;
   ProductRatingEdge?: ProductRatingEdgeResolvers<ContextType>;
   ProductRatingsSummary?: ProductRatingsSummaryResolvers<ContextType>;
-  ProductUpdateResponse?: ProductUpdateResponseResolvers<ContextType>;
+  ProductUpdatePayload?: ProductUpdatePayloadResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
   Timestamps?: TimestampsResolvers<ContextType>;
   User?: UserResolvers<ContextType>;
   UserConnection?: UserConnectionResolvers<ContextType>;
-  UserCreateResponse?: UserCreateResponseResolvers<ContextType>;
+  UserCreatePayload?: UserCreatePayloadResolvers<ContextType>;
   UserEdge?: UserEdgeResolvers<ContextType>;
   UserError?: UserErrorResolvers<ContextType>;
-  UserUpdateResponse?: UserUpdateResponseResolvers<ContextType>;
+  UserUpdatePayload?: UserUpdatePayloadResolvers<ContextType>;
   Votable?: VotableResolvers<ContextType>;
   Vote?: VoteResolvers<ContextType>;
   VotesSummary?: VotesSummaryResolvers<ContextType>;

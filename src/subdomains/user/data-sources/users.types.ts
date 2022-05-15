@@ -1,8 +1,8 @@
 import { ObjectId } from "mongodb";
 import {
   Maybe,
-  UserCreateResponse,
-  UserUpdateResponse,
+  UserCreatePayload,
+  UserUpdatePayload,
 } from "@generation/generated";
 import { SourceConnection } from "../../generic/types";
 
@@ -15,12 +15,12 @@ export interface UserDocument {
 
 export type SourceUserConnection = SourceConnection<UserDocument>;
 
-export interface SourceUserCreateResponse
-  extends Omit<UserCreateResponse, "user"> {
+export interface SourceUserCreatePayload
+  extends Omit<UserCreatePayload, "user"> {
   user?: Maybe<UserDocument> | undefined;
 }
 
-export interface SourceUserUpdateResponse
-  extends Omit<UserUpdateResponse, "user"> {
+export interface SourceUserUpdatePayload
+  extends Omit<UserUpdatePayload, "user"> {
   user?: Maybe<UserDocument> | undefined;
 }

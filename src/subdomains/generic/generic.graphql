@@ -1,7 +1,3 @@
-interface Node {
-  id: ID!
-}
-
 interface DisplayableError {
   field: [String!]
   message: String!
@@ -12,24 +8,6 @@ type UserError implements DisplayableError {
   message: String!
 }
 
-type PageInfo {
-  hasPreviousPage: Boolean!
-  hasNextPage: Boolean!
-  startCursor: String
-  endCursor: String
-}
-
-interface Edge {
-  cursor: String!
-  node: Node!
-}
-
-interface Connection {
-  edges: [Edge!]!
-  pageInfo: PageInfo!
-}
-
-# Misc...
 interface Contribution {
   creator: User!
 }

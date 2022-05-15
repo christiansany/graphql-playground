@@ -16,6 +16,9 @@ generates:
       contextType: src/server/types#GraphQLCustomResolversContext
       scalars:
         Void: "void"
+      mappers:
+        User: src/subdomains/user/data-sources/users.types#UserDocument
+        Product: src/subdomains/product/data-sources/products.types#ProductDocument
 hooks:
   afterOneFileWrite:
     - tslint --fix

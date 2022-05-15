@@ -14,7 +14,9 @@ export const typeDefs = mergeTypeDefs(typesSubdomains.concat(typesLib));
 export const resolvers = loadFilesSync(
   [
     path.join(__dirname, "../subdomains/**/resolver.*"),
+    path.join(__dirname, "../subdomains/**/resolvers.*"),
     path.join(__dirname, "../subdomains/**/*.resolver.*"),
+    path.join(__dirname, "../subdomains/**/*.resolvers.*"),
   ],
   { extensions: [".js", ".ts"] }
 );

@@ -1,0 +1,17 @@
+type Query {
+  product(id: ID!): Product
+  products(
+    first: Int
+    last: Int
+    before: String
+    after: String
+    query: String
+    sortKey: ProductSortKey! = ID
+    reverse: Boolean! = false
+  ): ProductConnection!
+}
+
+enum ProductSortKey {
+  ID
+  PRICE
+}

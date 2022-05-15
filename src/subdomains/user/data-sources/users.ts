@@ -10,8 +10,8 @@ import { ObjectId, Collection } from "mongodb";
 import {
   UserDocument,
   SourceUserConnection,
-  SourceUserCreateResponse,
-  SourceUserUpdateResponse,
+  SourceUserCreatePayload,
+  SourceUserUpdatePayload,
 } from "./users.types";
 import { createParseQueryFn } from "../../../tools/query";
 import {
@@ -49,11 +49,20 @@ const sortFieldConfigs: ISortFieldConfigs<UserDocument> = {
   },
 };
 
+// TODO Types and stuff
 export default class UsersAPI extends MongoDataSource<UserDocument> {
-  public async getById({
-    id,
-  }: QueryUserArgs): Promise<UserDocument | null | undefined> {
-    return this.findOneById(id);
+  private getPage;
+  constructor(modelOrCollection: any) {
+    super(modelOrCollection);
+
+    this.getPage = createPaginatedMongoDBDataFn<UserDocument, UserSortKey>(
+      this.collection,
+      sortFieldConfigs
+    );
+  }
+
+  public async getById({ id }: QueryUserArgs): Promise<UserDocument | null> {
+    return (await this.findOneById(id)) || null;
   }
 
   public async getByConnection({
@@ -68,13 +77,7 @@ export default class UsersAPI extends MongoDataSource<UserDocument> {
     // TODO: Unify parser functions
     const query = createFilterQuery(rawQuery);
 
-    const connectionResponse = await createPaginatedMongoDBDataFn<
-      UserDocument,
-      UserSortKey
-    >(
-      this.collection,
-      sortFieldConfigs
-    )({
+    const connectionResponse = await this.getPage({
       ...paginationArgs,
       query,
       sortKey,
@@ -86,7 +89,7 @@ export default class UsersAPI extends MongoDataSource<UserDocument> {
 
   public async createUser(
     input: UserCreateInput
-  ): Promise<SourceUserCreateResponse> {
+  ): Promise<SourceUserCreatePayload> {
     const collection: Collection<UserDocument> = this.collection;
     const existingUser = await collection.findOne({ email: input.email });
 
@@ -113,7 +116,7 @@ export default class UsersAPI extends MongoDataSource<UserDocument> {
 
   public async updateUser(
     input: UserUpdateInput
-  ): Promise<SourceUserUpdateResponse> {
+  ): Promise<SourceUserUpdatePayload> {
     const collection: Collection<UserDocument> = this.collection;
     const { id, ...rest } = input;
     const user = await collection.findOne({ _id: new ObjectId(id) });

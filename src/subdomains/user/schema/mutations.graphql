@@ -1,0 +1,27 @@
+type Mutation {
+  userCreate(input: UserCreateInput!): UserCreatePayload
+  userUpdate(input: UserUpdateInput!): UserUpdatePayload
+}
+
+input UserCreateInput {
+  username: String!
+  email: String!
+  height: Int!
+}
+
+type UserCreatePayload {
+  user: User
+  userErrors: [UserError!]!
+}
+
+input UserUpdateInput {
+  id: ID!
+  username: String
+  email: String
+  height: Int
+}
+
+type UserUpdatePayload {
+  user: User
+  userErrors: [UserError!]!
+}

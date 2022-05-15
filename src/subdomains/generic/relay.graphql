@@ -1,0 +1,67 @@
+type Query {
+  node(id: ID!): Node
+  nodes(ids: [ID!]!): [Node!]!
+}
+
+"""
+An object with an ID field to support global identification, in accordance with the [Relay
+specification](https://relay.dev/graphql/objectidentification.htm#sec-Node-Interface).
+"""
+interface Node {
+  """
+  A globally-unique identifier.
+  """
+  id: ID!
+}
+
+"""
+Returns information about pagination in a connection, in accordance with the
+[Relay specification](https://relay.dev/graphql/connections.htm#sec-undefined.PageInfo).
+"""
+type PageInfo {
+  """
+  Whether there are any pages prior to the current page.
+  """
+  hasPreviousPage: Boolean!
+  """
+  Whether there are more pages to fetch following the current page.
+  """
+  hasNextPage: Boolean!
+  """
+  The cursor corresponding to the first node in edges.
+  """
+  startCursor: String
+  """
+  The cursor corresponding to the last node in edges.
+  """
+  endCursor: String
+}
+
+"""
+A generic interface which holds one Edge and a cursor during pagination.
+"""
+interface Edge {
+  """
+  A cursor for use in pagination.
+  """
+  cursor: String!
+  """
+  The item implementing the node interface.
+  """
+  node: Node!
+}
+
+"""
+Returns a Connection, in accordance with
+[Relay specification](https://relay.dev/graphql/connections.htm#sec-Connection-Types).
+"""
+interface Connection {
+  """
+  A list of edges.
+  """
+  edges: [Edge!]!
+  """
+  Information to aid in pagination.
+  """
+  pageInfo: PageInfo!
+}

@@ -3,8 +3,8 @@ import DataLoaders from "../subdomains/dataLoaders";
 import ProductsAPI from "../subdomains/product/data-sources/product";
 
 export interface GraphQLCustomDataSources {
-  users: UsersAPI;
-  products: ProductsAPI;
+  User: UsersAPI;
+  Product: ProductsAPI;
 }
 
 export interface GraphQLCustomContext {
